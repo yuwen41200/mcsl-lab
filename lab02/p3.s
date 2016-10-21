@@ -1,3 +1,7 @@
+	.syntax unified
+	.cpu cortex-m4
+	.thumb
+
 .data
 	arr1: .byte 0x19, 0x34, 0x14, 0x32, 0x52, 0x23, 0x61, 0x29
 	arr2: .byte 0x18, 0x17, 0x33, 0x16, 0xFA, 0x20, 0x55, 0xAC
@@ -9,7 +13,7 @@
 bubble_sort:
 	@ r2: iterator of outer loop, i
 	mov  r2, #0x0
-	push lr
+	push {lr}
 
 start_outer:
 	@ condition: i < len - 1
@@ -31,6 +35,7 @@ start_inner:
 	add  r7, r3, #0x1
 	ldrb r6, [r0, r7]
 	cmp  r5, r6
+	it   gt
 	blgt swap
 
 	add  r3, r3, #0x1
@@ -41,7 +46,7 @@ end_inner:
 	b    start_outer
 
 end_outer:
-	pop  pc
+	pop  {pc}
 
 swap:
 	strb r5, [r0, r7]
