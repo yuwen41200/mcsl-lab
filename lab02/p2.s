@@ -1,5 +1,5 @@
 .data
-	ans:   .word 1
+	ans: .word 1
 .text
 	.global main
 	.equ N,20
@@ -12,7 +12,6 @@ fibb:
 	mov R5,#2
 	cmp R0,#3
 	blt done
-
 
 fib:
 	mov R1,R2
