@@ -14,14 +14,26 @@
 	.equ Y, 0xAA55
 
 hamming_distance:
-	@ TODO
-	bx lr
+	eor  r0, r1
+	cmp  r0, #0x0
+	beq  done
+
+count_ones:
+	add  r3, #0x1
+	sub  r1, r0, #0x1
+	ands r0, r1
+	bne  count_ones
+
+done:
+	bx   lr
 
 main:
-	movs r0, #X           @ error expected
-	movs r1, #Y
+	mov  r0, #X
+	mov  r1, #Y
 	ldr  r2, =result
+	ldr  r3, [r2]
 	bl   hamming_distance
+	str  r3, [r2]
 
 forever:
 	b    forever
