@@ -27,9 +27,9 @@ start_inner:
 	bge  end_inner
 
 	@ if arr[j] > arr[j+1] then swap
-	ldr  r5, [r0, r3]
+	ldrb r5, [r0, r3]
 	add  r7, r3, #0x1
-	ldr  r6, [r0, r7]
+	ldrb r6, [r0, r7]
 	cmp  r5, r6
 	blgt swap
 
@@ -44,8 +44,8 @@ end_outer:
 	pop  pc
 
 swap:
-	str  r5, [r0, r7]
-	str  r6, [r0, r3]
+	strb r5, [r0, r7]
+	strb r6, [r0, r3]
 	bx   lr
 
 main:
