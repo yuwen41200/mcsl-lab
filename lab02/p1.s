@@ -28,10 +28,12 @@ done:
 	bx   lr
 
 main:
-	mov  r0, #X
-	mov  r1, #Y
+	@ http://www.davespace.co.uk/arm/introduction-to-arm/immediates.html
+	ldr  r0, =X
+	ldr  r1, =Y
 	ldr  r2, =result
 	ldr  r3, [r2]
+	@ https://en.wikipedia.org/wiki/Hamming_distance
 	bl   hamming_distance
 	str  r3, [r2]
 
