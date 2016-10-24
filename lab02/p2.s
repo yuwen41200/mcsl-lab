@@ -14,7 +14,7 @@ fibb:
 	bgt outdone
 	cmp R0,#1
 	blt outdone
-	mov R5,#2 @count from 2 index
+	mov R5,#2 @ count from 2 index
 	cmp R0,#3
 	blt done
 
@@ -41,7 +41,7 @@ overflow:
 main:
 	mov R0,#N
 	mov R1,#1      @ R1=1
-	mov R2,#1	   @ R2=1
+	mov R2,#1      @ R2=1
 	mov R4,#1      @ R4=1
 
 	bl fibb
