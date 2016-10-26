@@ -34,7 +34,7 @@ arithmetic:
 	beq  arithmetic_end
 	cmp  R1, 0x20   @ '[space]'
 	beq  duplicate_spaces
-	ldrd R1, [R2, R3]
+	ldrh R1, [R2, R3]
 	cmp  R1, 0x2B00 @ '+\0'
 	beq  addition
 	cmp  R1, 0x2D00 @ '-\0'
@@ -152,7 +152,8 @@ atoi_inner:
 	cmp  R3, 0x2F @ character before '0'
 	ble  error
 	sub  R3, 0x30 @ '0'
-	mul  R1, 0xA
+	mov  R9, 0xA
+	mul  R1, R9
 	add  R1, R3
 	add  R0, 0x1
 	b    atoi_inner
@@ -166,7 +167,8 @@ atoi_end:
 
 additive_inverse:
 	@ called by atoi
-	sub  R1, 0, R1
+	mov  R9, 0x0
+	sub  R1, R9, R1
 	bx   lr
 
 error:
