@@ -20,8 +20,66 @@ main:
 	ldr  R1, =copy_expr
 	bl   memcpy
 
-	mov  R0, R1
+	ldr  R0, =user_stack
+	msr  msp, R0
+	ldr  R2, =postfix_expr
+	mov  R3, 0x0
+	ldr  R4, =copy_expr
+	b    arithmetic
+
+arithmetic:
+	@ arithmetic-related
+	ldrb R1, [R2, R3]
+	cmp  R1, 0x0
+	beq  arithmetic_end
+	cmp  R1, 0x20   @ '[space]'
+	beq  duplicate_spaces
+	ldrd R1, [R2, R3]
+	cmp  R1, 0x2B00 @ '+\0'
+	beq  addition
+	cmp  R1, 0x2D00 @ '-\0'
+	beq  substraction
+	add  R0, R4, R3
+	mov  R5, R0
 	bl   atoi
+	push {R1}
+	sub  R1, R0, R5
+	add  R3, R1
+	b    arithmetic
+
+addition:
+	@ arithmetic-related
+	pop  {R5}
+	pop  {R6}
+	add  R5, R6
+	push {R5}
+	add  R3, 0x2
+	b    arithmetic
+
+substraction:
+	@ arithmetic-related
+	pop  {R5}
+	pop  {R6}
+	sub  R5, R6
+	push {R5}
+	add  R3, 0x2
+	b    arithmetic
+
+duplicate_spaces:
+	@ arithmetic-related
+	add  R3, 0x1
+	b    arithmetic
+
+arithmetic_end:
+	@ arithmetic-related
+	pop  {R2}
+	mrs  R0, msp
+	ldr  R1, =user_stack
+	cmp  R0, R1
+	bne  error
+	ldr  R0, =expr_result
+	str  R2, [R0]
+	b    program_end
 
 memcpy:
 	@ R0: source address
@@ -72,23 +130,26 @@ atoi:
 	b    atoi_inner
 
 atoi_pos:
+	@ called by atoi
 	add  R0, 0x1
 	mov  R1, 0x0
 	b    atoi_inner
 
 atoi_neg:
+	@ called by atoi
 	add  R0, 0x1
 	mov  R1, 0x0
 	mov  R2, 0x1
 	b    atoi_inner
 
 atoi_inner:
+	@ called by atoi
 	ldrb R3, [R0]
 	cmp  R3, 0x0
 	beq  atoi_end
-	cmp  R3, 0x3A @ character after 9
+	cmp  R3, 0x3A @ character after '9'
 	bge  error
-	cmp  R3, 0x2F @ character before 0
+	cmp  R3, 0x2F @ character before '0'
 	ble  error
 	sub  R3, 0x30 @ '0'
 	mul  R1, 0xA
@@ -97,20 +158,24 @@ atoi_inner:
 	b    atoi_inner
 
 atoi_end:
+	@ called by atoi
 	add  R0, 0x1
 	cmp  R2, 0x0
 	bne  additive_inverse
 	bx   lr
 
 additive_inverse:
+	@ called by atoi
 	sub  R1, 0, R1
 	bx   lr
 
 error:
+	@ error handling
 	ldr  R0, =expr_result
 	ldr  R1, =0xFFFFFFFF
 	str  R1, [R0]
 	b    program_end
 
 program_end:
+	@ infinate loop
 	b    program_end
