@@ -98,7 +98,8 @@ arithmetic_end:
 	@ arithmetic-related
 	pop  {R2}
 	ldr  R1, =user_stack
-	cmp  R1, sp
+	mov  R9, sp
+	cmp  R1, R9
 	bne  error
 	ldr  R0, =expr_result
 	str  R2, [R0]
