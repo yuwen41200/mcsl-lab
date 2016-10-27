@@ -8,14 +8,16 @@
 
 .text
 	.global main
-	m: .word 0x5E
-	n: .word 0x60
+	m: .word 24
+	n: .word 60
 
 main:
 	ldr  r2, =m
 	ldr  r0, [r2]
 	ldr  r3, =n
 	ldr  r1, [r3]
+
+	mov  r10, 0x0      @ r10: max stack size
 
 	push {r0, r1, lr}
 	bl   gcd
@@ -24,12 +26,26 @@ main:
 	ldr  r3, =result
 	str  r2, [r3]
 
+	ldr  r3, =max_size
+	str  r10, [r3]
+
 	b    forever
 
 gcd:
 	ldr  r0, [sp]      @ param a
 	ldr  r1, [sp, 0x4] @ param b
 
+	mrs  r8, msp
+	mov  r7, sp
+	sub  r8, r7
+	cmp  r8, r10
+	bgt  update_r10
+	b    gcd_final
+
+update_r10:
+	mov  r10, r8
+
+gcd_final:
 	cmp  r0, 0x0
 	beq  return_b
 
@@ -65,7 +81,8 @@ case_1:
 	push {r0, r1, lr}
 	bl   gcd
 	pop  {r0, r1, r9}
-	mul  r2, 0x2
+	mov  r8, 0x2
+	mul  r2, r8
 	mov  pc, r9
 
 case_2:
