@@ -35,13 +35,21 @@ arithmetic:
 	cmp  R1, 0x20   @ '[space]'
 	beq  duplicate_spaces
 	ldrh R1, [R2, R3]
-	cmp  R1, 0x2B00 @ '+\0'
+	ldr  R9, =0x202B
+	cmp  R1, R9     @ " +"
 	beq  addition
-	cmp  R1, 0x2D00 @ '-\0'
+	cmp  R1, 0x2B   @ "\0+"
+	beq  addition_last
+	ldr  R9, =0x202D
+	cmp  R1, R9     @ " -"
 	beq  substraction
+	cmp  R1, 0x2D   @ "\0-"
+	beq  substraction_last
 	add  R0, R4, R3
 	mov  R5, R0
+	push {R2, R3, R4, R5}
 	bl   atoi
+	pop  {R2, R3, R4, R5}
 	push {R1}
 	sub  R1, R0, R5
 	add  R3, R1
@@ -51,19 +59,35 @@ addition:
 	@ arithmetic-related
 	pop  {R5}
 	pop  {R6}
-	add  R5, R6
-	push {R5}
+	add  R6, R5
+	push {R6}
 	add  R3, 0x2
 	b    arithmetic
+
+addition_last:
+	@ arithmetic-related
+	pop  {R5}
+	pop  {R6}
+	add  R6, R5
+	push {R6}
+	b    arithmetic_end
 
 substraction:
 	@ arithmetic-related
 	pop  {R5}
 	pop  {R6}
-	sub  R5, R6
-	push {R5}
+	sub  R6, R5
+	push {R6}
 	add  R3, 0x2
 	b    arithmetic
+
+substraction_last:
+	@ arithmetic-related
+	pop  {R5}
+	pop  {R6}
+	sub  R6, R5
+	push {R6}
+	b    arithmetic_end
 
 duplicate_spaces:
 	@ arithmetic-related
@@ -73,9 +97,8 @@ duplicate_spaces:
 arithmetic_end:
 	@ arithmetic-related
 	pop  {R2}
-	mrs  R0, msp
 	ldr  R1, =user_stack
-	cmp  R0, R1
+	cmp  R1, sp
 	bne  error
 	ldr  R0, =expr_result
 	str  R2, [R0]
@@ -85,6 +108,10 @@ memcpy:
 	@ R0: source address
 	@ R1: destination address
 	push {lr}
+	b    memcpy_inner
+
+memcpy_inner:
+	@ called by memcpy
 	ldrb R2, [R0]
 	cmp  R2, 0x0
 	beq  go_back
@@ -94,7 +121,7 @@ memcpy:
 	strb R2, [R1]
 	add  R0, 0x1
 	add  R1, 0x1
-	b    memcpy
+	b    memcpy_inner
 
 space_to_zero:
 	@ called by memcpy
@@ -126,6 +153,8 @@ atoi:
 	beq  atoi_pos
 	cmp  R1, 0x2D @ '-'
 	beq  atoi_neg
+	cmp  R1, 0x0
+	beq  error
 	mov  R1, 0x0
 	b    atoi_inner
 
