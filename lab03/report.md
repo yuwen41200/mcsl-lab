@@ -366,16 +366,19 @@ forever:
 ![p1a](p1a.png)
 
 * 先執行 `strlen`，但是這個步驟其實沒有什麼意義，只不過是為了展示我們有正確地實作出 `strlen` 而已。
-* 再執行 `memcpy`，將 `postfix_expr` 從唯讀的 text segment 複製到可寫入的 data segment，同時將所有的空格取代為 `\0`。
-* 最後執行 `arithmetic`，依照 postfix 的規則操作 stack，如果遇到運算元會先呼叫 `atoi` 將其轉換為數值。
-* 錯誤處理的部份，`-100 10abc + - 10 +` 或 `-100 10 20 + - 1000` 皆會判斷為錯誤，`  -100  10 20  +  - 10   + ` 則能夠正確計算。
+* 再執行 `memcpy`，將 `postfix_expr` 從唯讀的 text segment 複製到可寫入的 data segment，  
+  同時將所有的空格取代為 `\0`。
+* 最後執行 `arithmetic`，依照 postfix 的規則操作 stack，如果遇到運算子會先呼叫 `atoi` 將其轉換為數值。
+* 錯誤處理的部份，`-100△10abc△+△-△10△+` 或 `-100△10△20△+△-△1000` 皆會判斷為錯誤，  
+  `△△-100△△10△20△△+△△-△10△△△+△` 則能夠正確計算。
 
 ### 求最大公因數並計算最多用了多少 Stack Size ###
 
 ![p2a](p2a.png)
 
-* 依照 Stein's algorithm 計算 GCD，每次呼叫函式之前，都會先將函式的兩個參數及當前的 link register 存進 stack，函式回傳之後再將它們取出。
-* 因此每進入一層遞迴，便會多占用 12 位元組的記憶體空間。
+* 依照 Stein's algorithm 計算 GCD，每次呼叫函式之前，都會先將函式的兩個參數及當前的 link register 存進 stack，  
+  函式回傳之後再將它們取出。
+* 因此每進入一層遞迴，便會多占用 12 位元組的 stack 空間。
 
 ## 心得討論與應用聯想 ##
 
