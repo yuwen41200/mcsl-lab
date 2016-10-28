@@ -8,8 +8,8 @@
 
 .text
 	.global main
-	m: .word 24
-	n: .word 60
+	m: .word 0x5E
+	n: .word 0x60
 
 main:
 	ldr  r2, =m
@@ -17,6 +17,7 @@ main:
 	ldr  r3, =n
 	ldr  r1, [r3]
 
+	mov  r11, sp       @ r11: start of stack
 	mov  r10, 0x0      @ r10: max stack size
 
 	push {r0, r1, lr}
@@ -35,9 +36,8 @@ gcd:
 	ldr  r0, [sp]      @ param a
 	ldr  r1, [sp, 0x4] @ param b
 
-	mrs  r8, msp
 	mov  r7, sp
-	sub  r8, r7
+	sub  r8, r11, r7
 	cmp  r8, r10
 	bgt  update_r10
 	b    gcd_final
