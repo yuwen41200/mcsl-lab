@@ -53,8 +53,12 @@ gcd_final:
 	beq  return_a
 
 	mov  r2, 0x1
-	and  r3, r0, r2    @ r3: bool, a is even
-	and  r4, r1, r2    @ r4: bool, b is even
+	and  r3, r0, r2
+	and  r4, r1, r2
+
+	mov  r8, 0x1
+	eor  r3, r8        @ r3: bool, a is even
+	eor  r4, r8        @ r4: bool, b is even
 
 	ands r2, r3, r4
 	bne  case_1
