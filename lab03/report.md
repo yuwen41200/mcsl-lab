@@ -365,42 +365,20 @@ forever:
 
 ![p1a](p1a.png)
 
-1. 程式執行結束後 `r2` 值為多少？如何觀察？  
-   值為多少：`0x69`。  
-   如何觀察：進入 debug 模式，讓程式執行到最後，用眼睛看右上角的 "Registers" 視窗。
+* 先執行 `strlen`，但是這個步驟其實沒有什麼意義，只不過是為了展示我們有正確地實作出 `strlen` 而已。
+* 再執行 `memcpy`，將 `postfix_expr` 從唯讀的 text segment 複製到可寫入的 data segment，同時將所有的空格取代為 `\0`。
+* 最後執行 `arithmetic`，依照 postfix 的規則操作 stack，如果遇到運算元會先呼叫 `atoi` 將其轉換為數值。
+* 錯誤處理的部份，`-100 10abc + - 10 +` 或 `-100 10 20 + - 1000` 皆會判斷為錯誤，`  -100  10 20  +  - 10   + ` 則能夠正確計算。
 
 ### 求最大公因數並計算最多用了多少 Stack Size ###
 
 ![p2a](p2a.png)
 
-觀察 `X` 內容值變化：  
-初始值為 `0x64 (=100)`，第 18 行執行後變為 `0xb9`。
-
-1. 變數 `X` 與 `str` 的初始值是由誰在何處初始化的？  
-   由誰：微控制器啟動（或 reset）時執行的程式。  
-   在何處：`startup_stm32.s` 中的 `LoopCopyDataInit` 與 `CopyDataInit` 標籤。
-
-2. 若將 `X` 宣告改在 text section 對其程式執行結果會有何改變？  
-   `X` 的位址會改變（從 data section 移至 text section）。  
-   `str` 的位址會改變（往前移四個位元組）。  
-   因為 text section 是唯讀的，所以第 18 行（將值寫入 `X` 的位址）無效。
-
-3. 程式執行完畢後 `r2` 內容與 `str` 字串在 memory 前 4 個 byte 呈現內容有何差異？  
-   `r2` 的值是 `0x6c6c6548`，也就是 "lleH"。  
-   `str` 的前四個位元組是 `0x48656c6c`，也就是 "Hell"。  
-   （所以這個微控制器是 little-endian。）
-
-4. 變數 `str` "Hello World!" 有無其他種宣告方式？若有請說明其中一種。  
-   有，因為變數的記憶體位址是連續的，所以可以將第 7 行改為：  
-   ```assembly
-   str:  .word 0x6c6c6548 @ "lleH"
-   str1: .word 0x6f57206f @ "oW o"
-   str2: .word 0x21646c72 @ "!dlr"
-   str3: .byte 0x00       @ "\0"
-   ```
+* 依照 Stein's algorithm 計算 GCD，每次呼叫函式之前，都會先將函式的兩個參數及當前的 link register 存進 stack，函式回傳之後再將它們取出。
+* 因此每進入一層遞迴，便會多占用 12 位元組的記憶體空間。
 
 ## 心得討論與應用聯想 ##
 
-* 這套開發工具雖然有 Linux 版，但是在 Ubuntu 16.04 LTS 下並不會 work。
-* 原來 ARM 的組合語言的註解是用 "@" 符號。
-* 指令是 case-insensitive。
+* 第一題的 `postfix_expr` 長度（包含 `\0`）必需是 4 的倍數，否則在 assemble 時會出現錯誤（沒有 alignment）。
+* 第二題的 `max_size` 應該沒有標準答案，因為題目並沒有限制 stack 只能存放哪些資料。
+* 這門課不但讓我學了微處理機，還讓我學了危機處理，雖然這門課已經改為選修了，不過我一定會推薦學弟妹來修的。
