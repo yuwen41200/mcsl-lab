@@ -15,16 +15,14 @@
 	.equ GPIOB_PUPDR  , 0x4800040C
 	.equ GPIOB_ODR    , 0x48000414
 	.equ GPIOC_MODER  , 0x48000800
+	.equ GPIOC_PUPDR  , 0x4800080C
 	.equ GPIOC_IDR    , 0x48000810
-	.equ GPIOA_MODER  , 0x48000000
-	.equ GPIOA_PUPDR  , 0x4800000C
-	.equ GPIOA_IDR    , 0x48000010
 
 main:
 	b    init_gpio
 
 init_gpio:
-	mov  r0, 0b111
+	mov  r0, 0b110
 	ldr  r1, =RCC_AHB2ENR
 	str  r0, [r1]
 
@@ -37,13 +35,7 @@ init_gpio:
 
 	ldr  r1, =GPIOC_MODER
 	ldr  r0, [r1]
-	ldr  r2, =0xF3FFFFFF
-	and  r0, r2
-	str  r0, [r1]
-
-	ldr  r1, =GPIOA_MODER
-	ldr  r0, [r1]
-	ldr  r2, =0xFFFFFF00
+	ldr  r2, =0xF3FFFF00
 	and  r0, r2
 	str  r0, [r1]
 
@@ -51,15 +43,16 @@ init_gpio:
 	ldr  r1, =GPIOB_OSPEEDR
 	str  r0, [r1]
 
-	ldr  r1, =GPIOA_PUPDR
+	ldr  r1, =GPIOC_PUPDR
 	ldr  r0, [r1]
 	ldr  r2, =0b01010101
+	and  r0, 0xFFFFFF00
 	orr  r0, r2
 	str  r0, [r1]
 
 	ldr  r10, =GPIOB_ODR @ leds
 	ldr  r11, =GPIOC_IDR @ user button
-	ldr  r12, =GPIOA_IDR @ dip switch
+	ldr  r12, =GPIOC_IDR @ dip switch
 
 	mov  r0, 0b11111111
 	strh r0, [r10]
