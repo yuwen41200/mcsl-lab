@@ -61,6 +61,11 @@ init_gpio:
 	ldr  r11, =GPIOC_IDR @ user button
 	ldr  r12, =GPIOA_IDR @ dip switch
 
+	mov  r0, 0b11111111
+	strh r0, [r10]
+	b    poll_button_init
+
+poll_button_init:
 	mov  r8, 1
 	mov  r9, 1
 	movs r0, 0
@@ -107,5 +112,47 @@ read_switch:
 	ldrb r0, [r0]
 
 	cmp  r0, r1
+	mov  r1, 0b11111111
+	mov  r2, 0b0
 	beq  leds_3x
+	b    leds_1x
+
+leds_3x:
+	eor  r1, 0b11111111
+	strh r1, [r10]
+	add  r2, 0b1
+
+	cmp  r2, 6
+	beq  poll_button_init
+
+	ldr  r0, =2000000
+	movs r0, r0
+	b    leds_3x_blink
+
+leds_3x_blink:
+	beq  leds_3x_again
+	subs r0, 4
+	b    leds_3x_blink
+
+leds_3x_again:
+	b    leds_3x
+
+leds_1x:
+	eor  r1, 0b11111111
+	strh r1, [r10]
+	add  r2, 0b1
+
+	cmp  r2, 2
+	beq  poll_button_init
+
+	ldr  r0, =2000000
+	movs r0, r0
+	b    leds_1x_blink
+
+leds_1x_blink:
+	beq  leds_1x_again
+	subs r0, 4
+	b    leds_1x_blink
+
+leds_1x_again:
 	b    leds_1x
