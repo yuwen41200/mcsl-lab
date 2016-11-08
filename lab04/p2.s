@@ -15,7 +15,7 @@
 	.equ GPIOB_PUPDR  , 0x4800040C
 	.equ GPIOB_ODR    , 0x48000414
 	.equ GPIOC_MODER  , 0x48000800
-	.equ GPIOC_IDR    ,	0x48000810
+	.equ GPIOC_IDR    , 0x48000810
 
 @ r0 gpio led output [init in gpio_init]
 @ r7 running or stopped [init in main]
