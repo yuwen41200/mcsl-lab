@@ -8,6 +8,8 @@
 .text
 	.global main
 
+	.equ RCC_AHB2ENR,  0x4002104C
+
 	.equ DECODE_MODE,  0x09
 	.equ DISPLAY_TEST, 0x0F
 	.equ SCAN_LIMIT,   0x0B
@@ -26,17 +28,50 @@ main:
 	bl   gpio_init
 	bl   max7219_init
 
-loop:
-	bl   display_0_to_f
+display_0_to_f:
+	ldr  r2, 0x0
+	ldr  r3, =arr
 	b    loop
 
 gpio_init:
-	@ TODO: Initialize three GPIO pins as output for max7219 DIN, CS and clock
+	mov  r0, 0b00000000000000000000000000000001
+	ldr  r1, =RCC_AHB2ENR
+	str  r0, [r1]
+
+	ldr  r1, =GPIOA_BASE @ GPIOA_MODER
+	ldr  r2, [r1]
+	and  r2, 0b11111111111111110000001111111111
+	orr  r2, 0b00000000000000000101010000000000
+	str  r2, [r1]
+
+	add  r1, 0x4 @ GPIOA_OTYPER
+	ldr  r2, [r1]
+	and  r2, 0b11111111111111111111111100011111
+	str  r2, [r1]
+
+	add  r1, 0x4 @ GPIOA_SPEEDER
+	ldr  r2, [r1]
+	and  r2, 0b11111111111111110000001111111111
+	orr  r2, 0b00000000000000000101010000000000
+	str  r2, [r1]
+
 	bx   lr
 
-display_0_to_f:
-	@ TODO: Display 0 to F at first digit on 7-SEG LED. Display one per second.
-	bx   lr
+loop:
+	ldr  r0, 0x0
+	ldrb r1, [r3, r2]
+	bl   max7219_send
+
+	ldr  r0, =4000000 @ delay 1s
+	movs r0, r0
+	bl   delay
+
+	add  r2, 0x1
+	cmp  r2, 0x10
+	bne  loop
+
+	mov  r2, 0x0
+	b    loop
 
 max7219_send:
 	@ input parameter: r0 is ADDRESS , r1 is DATA
@@ -96,5 +131,9 @@ max7219_init:
 	pop  {r0, r1, r2, pc}
 
 delay:
-	@ delay 1s
+	beq  delay_end
+	subs r0, 0x4
+	b    delay
+
+delay_end:
 	bx   lr
