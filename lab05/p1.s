@@ -30,7 +30,7 @@ main:
 	bl   max7219_init
 
 display_0_to_f:
-	ldr  r2, 0x0
+	mov  r2, 0x0
 	ldr  r3, =arr
 	b    loop
 
@@ -59,7 +59,7 @@ gpio_init:
 	bx   lr
 
 loop:
-	ldr  r0, 0x0
+	mov  r0, 0x1
 	ldrb r1, [r3, r2]
 	bl   max7219_send
 
@@ -76,6 +76,7 @@ loop:
 
 max7219_send:
 	@ input parameter: r0 is ADDRESS , r1 is DATA
+	push {r0, r1, r2, r3, r4, r5, r6, r7, r8, lr}
 	lsl  r0, r0, 0x8
 	add  r0, r1
 	ldr  r1, =GPIOA_BASE
@@ -104,7 +105,7 @@ max7219_send_check_done:
 	bge  max7219_send_loop
 	str  r2, [r1, r6] @ cs -> 0
 	str  r2, [r1, r5] @ cs -> 1
-	bx   lr
+	pop  {r0, r1, r2, r3, r4, r5, r6, r7, r8, pc}
 
 max7219_init:
 	push {r0, r1, r2, lr}
