@@ -188,7 +188,7 @@ max7219_init:
 	pop  {r0, r1, r2, pc}
 
 check_button_init:
-	ldr  r0, =4000000 @ delay 1s
+	ldr  r0, =400000000
 	movs r0, r0
 	b    check_button_delay
 
@@ -235,6 +235,8 @@ check_button_set_timestamp:
 
 check_button_end:
 	sub  r9, r0
-	sub  r9, 3000000
-	bgt  main
+	ldr  r0, =4000000
+	subs r9, r0
+	bge  main
+	mov  r9, 0x0
 	bx   lr
