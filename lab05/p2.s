@@ -3,8 +3,8 @@
 	.thumb
 
 .data
-	arr: .byte 0x0, 0x3, 0x1, 0x6, 0x2, 0x1, 0x3
-	@ arr: .byte 0x0, 0x3, 0x1, 0x6, 0x3, 0x2, 0x3
+	num: .word 316213
+	arr: .byte 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0
 
 .text
 	.global main
@@ -26,11 +26,39 @@
 	.equ BRR_OFFSET,   0x28 @ clear bit
 
 main:
+	bl   fix
 	bl   gpio_init
 	bl   max7219_init
+	b    display_arr
+
+fix:
+	ldr  r0, =num
+	ldr  r0, [r0] @ divident / remain
+	mov  r1, 0 @ quotient
+	ldr  r2, =arr
+
+keep_fixing:
+	cmp  r0, 10
+	blt  stop_fixing
+	sub  r0, 10
+	add  r1, 1
+	b    keep_fixing
+
+stop_fixing:
+	str  r0, [r2]
+	add  r2, 1
+	cmp  r1, 0
+	beq  final_fix
+	mov  r0, r1
+	mov  r1, 0
+	b    keep_fixing
+
+final_fix:
+	str  r1, [r2]
+	bx   lr
 
 display_arr:
-	mov  r0, 0x7
+	mov  r0, 0x1
 	mov  r2, 0x0
 	ldr  r3, =arr
 	b    loop
@@ -63,12 +91,12 @@ loop:
 	ldrb r1, [r3, r2]
 	bl   max7219_send
 
-	sub  r0, 0x1
+	add  r0, 0x1
 	add  r2, 0x1
 	cmp  r2, 0x8
 	bne  loop
 
-	mov  r0, 0x7
+	mov  r0, 0x1
 	mov  r2, 0x0
 	b    loop
 
