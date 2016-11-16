@@ -27,7 +27,10 @@
 	.equ BRR_OFFSET,   0x28 @ clear bit
 
 main:
-	mov  r9, 0x0
+	mov  r9, 0x0 @ counter for long press
+	mov  r11, 0x1
+	mov  r12, 0x1
+
 	bl   gpio_init
 	bl   max7219_init
 
@@ -118,6 +121,7 @@ loop:
 	bleq loop_last
 	add  r2, 0x1
 
+	mov  r9, 0x0
 	mov  r11, 0x1
 	mov  r12, 0x1
 	bl   check_button_init
@@ -188,7 +192,7 @@ max7219_init:
 	pop  {r0, r1, r2, pc}
 
 check_button_init:
-	ldr  r0, =400000000
+	ldr  r0, =4000000 @ delay 1s
 	movs r0, r0
 	b    check_button_delay
 
@@ -207,7 +211,19 @@ check_button:
 	ldrh r1, [r10]
 	lsr  r1, 13
 	mov  r4, 1
-	and  r1, r4
+	ands r1, r4
+	beq  check_button_increment
+	cmp  r9, 31
+	bge  main
+	mov  r9, 0
+	cmp  r1, r11
+	mov  r11, r1
+	beq  check_button_confirmed
+	subs r0, 8
+	b    check_button_delay
+
+check_button_increment:
+	add  r9, 1
 	cmp  r1, r11
 	mov  r11, r1
 	beq  check_button_confirmed
@@ -215,17 +231,6 @@ check_button:
 	b    check_button_delay
 
 check_button_confirmed:
-	cmp  r9, 0
-	beq  check_button_set_timestamp
-	subs r1, r11, r12
-	cmp  r1, 1
-	mov  r12, r11
-	beq  check_button_end
-	subs r0, 8
-	b    check_button_delay
-
-check_button_set_timestamp:
-	mov  r9, r0
 	subs r1, r11, r12
 	cmp  r1, 1
 	mov  r12, r11
@@ -234,9 +239,4 @@ check_button_set_timestamp:
 	b    check_button_delay
 
 check_button_end:
-	sub  r9, r0
-	ldr  r0, =4000000
-	subs r9, r0
-	bge  main
-	mov  r9, 0x0
 	bx   lr
