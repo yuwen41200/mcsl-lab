@@ -27,6 +27,7 @@
 	.equ BRR_OFFSET,   0x28 @ clear bit
 
 main:
+	mov  r9, 0x0
 	bl   gpio_init
 	bl   max7219_init
 
@@ -214,6 +215,17 @@ check_button:
 	b    check_button_delay
 
 check_button_confirmed:
+	cmp  r9, 0
+	beq  check_button_set_timestamp
+	subs r1, r11, r12
+	cmp  r1, 1
+	mov  r12, r11
+	beq  check_button_end
+	subs r0, 8
+	b    check_button_delay
+
+check_button_set_timestamp:
+	mov  r9, r0
 	subs r1, r11, r12
 	cmp  r1, 1
 	mov  r12, r11
@@ -222,4 +234,7 @@ check_button_confirmed:
 	b    check_button_delay
 
 check_button_end:
+	sub  r9, r0
+	sub  r9, 3000000
+	bgt  main
 	bx   lr
