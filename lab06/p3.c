@@ -15,6 +15,28 @@
 unsigned int x_pin = {X0, X1, X2, X3};
 unsigned int y_pin = {Y0, Y1, Y2, Y3};
 unsigned int total, len;
+char set[14];
+
+void set_clear()
+{
+	for (int i = 0; i < 14; i++)
+		set[i] = 0;
+}
+
+void set_insert(int i)
+{
+	if (i >= 0 && i < 14)
+		set[i] = 1;
+}
+
+int set_reduce()
+{
+	int sum = 0;
+	for (int i = 0; i < 14; i++)
+		if (set[i])
+			sum += i;
+	return sum;
+}
 
 // initial keypad gpio pin, X as output and Y as input
 void keypad_init()
@@ -113,6 +135,7 @@ int main()
 	total = 0;
 	len = 0;
 	int input = -1, prev_input = -1;
+	set_clear();
 
 	while (1)
 	{
@@ -123,17 +146,26 @@ int main()
 		{
 			total = 0;
 			len = 0;
+			set_clear();
+			display(total, len);
 		}
-		else if (input >= 10 && len + 2 <= 8)
+		else if (input != -1)
+			set_insert(input);
+		else
 		{
-			total = total * 100 + input;
-			len += 2;
+			input = set_reduce();
+			set_clear();
+			if (input >= 10 && len + 2 <= 8)
+			{
+				total = total * 100 + input;
+				len += 2;
+			}
+			else if (input < 10 && input >= 0 && len + 1 <= 8)
+			{
+				total = total * 10 + input;
+				len += 1;
+			}
+			display(total, len);
 		}
-		else if (input < 10 && input >= 0 && len + 1 <= 8)
-		{
-			total = total * 10 + input;
-			len += 1;
-		}
-		display(total, len);
 	}
 }
