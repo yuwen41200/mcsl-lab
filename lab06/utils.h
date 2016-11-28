@@ -53,7 +53,7 @@ int display(int data, int num_digs)
 #define GPIO_Pin_15 0b1000000000000000
 
 int GPIO_ReadInputDataBit(GPIO_TypeDef * a, uint16_t b) {
-	return 6;
+	return a->IDR & b;
 }
 
 #endif /* UTILS_H_ */

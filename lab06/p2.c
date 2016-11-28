@@ -42,7 +42,7 @@ void keypad_init()
  *   >=0: key pressed value
  *   -1: no key press
  */
-char keypad_scan()
+signed char keypad_scan()
 {
 	XPORT->BSRR = X0;
 	XPORT->BRR  = X1;
@@ -108,6 +108,14 @@ int main()
 	gpio_init();
 	max7219_init();
 	keypad_init();
-	char a = keypad_scan();
-	display(a, 2);
+	while (1)
+	{
+		int input = keypad_scan();
+		if (input >= 10)
+			display(input, 2);
+		else if (input >= 0)
+			display(input, 1);
+		else
+			display(input, 0);
+	}
 }
