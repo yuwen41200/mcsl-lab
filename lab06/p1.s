@@ -105,4 +105,4 @@ max7219_send_check_done:
 	bge  max7219_send_loop
 	str  r2, [r1, r6] @ cs -> 0
 	str  r2, [r1, r5] @ cs -> 1
-	pop  {r0, r1, r2, r3, r4, r5, r6, r7, r8, lr}
+	pop  {r0, r1, r2, r3, r4, r5, r6, r7, r8, pc}
