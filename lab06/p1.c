@@ -16,23 +16,26 @@ extern void max7219_send(unsigned char address, unsigned char data);
  */
 int display(int data, int num_digs)
 {
-	for (int i = 1; i <= num_digs; i++)
+	int data2 = data, i;
+	for (i = 1; i <= num_digs; i++)
 	{
-		max7219_send(i, data % 10);
 		if (data % 10 < 0)
-		{
 			max7219_send(i, -data % 10);
-			max7219_send(i + 1, 10);
-		}
+		else
+			max7219_send(i, data % 10);
 		data /= 10;
 	}
+	if (data2 < 0)
+		max7219_send(num_digs, 10);
+	for ( ; i <= 8; i++)
+		max7219_send(i, 15);
 	return (data > 99999999 || data < -9999999) ? -1 : 0;
 }
 
 int main()
 {
-	int student_id = 316323;
+	int student_id = -123;
 	gpio_init();
 	max7219_init();
-	display(student_id, 7);
+	display(student_id, 8);
 }
