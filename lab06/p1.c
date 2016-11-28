@@ -19,9 +19,14 @@ int display(int data, int num_digs)
 	for (int i = 1; i <= num_digs; i++)
 	{
 		max7219_send(i, data % 10);
+		if (data % 10 < 0)
+		{
+			max7219_send(i, -data % 10);
+			max7219_send(i + 1, 10);
+		}
 		data /= 10;
 	}
-	return data > 99999999 ? -1 : 0;
+	return (data > 99999999 || data < -9999999) ? -1 : 0;
 }
 
 int main()
