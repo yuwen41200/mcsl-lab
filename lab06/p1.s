@@ -2,10 +2,10 @@
 	.cpu cortex-m4
 	.thumb
 
-.global max7219_init
-.global max7219_send
-.global gpio_init
-.global fix
+.text
+	.global max7219_init
+	.global max7219_send
+	.global gpio_init
 
 	.equ RCC_AHB2ENR,  0x4002104C
 
@@ -23,36 +23,9 @@
 	.equ BSRR_OFFSET,  0x18 @ set bit
 	.equ BRR_OFFSET,   0x28 @ clear bit
 
-
-fix:
-	//ldr  r0, =input
-	//ldr  r0, [r0] @ divident / remain
-	push { r0 , r1 , r2 , lr }
-	mov  r2, 0 @ quotient
-	ldr  r1, =arr
-
-keep_fixing:
-	cmp  r0, 10
-	blt  stop_fixing
-	sub  r0, 10
-	add  r2, 1
-	b    keep_fixing
-
-stop_fixing:
-	str  r0, [r1]
-	add  r1, 1
-	cmp  r2, 0
-	beq  final_fix
-	mov  r0, r2
-	mov  r2, 0
-	b    keep_fixing
-
-final_fix:
-	str  r2, [r1]
-	pop  { r0 , r1 , r2 , lr}
-	bx   lr
-
 gpio_init:
+	push {r0, r1, r2, lr}
+
 	mov  r0, 0b00000000000000000000000000000001
 	ldr  r1, =RCC_AHB2ENR
 	str  r0, [r1]
@@ -74,10 +47,11 @@ gpio_init:
 	orr  r2, 0b00000000000000000101010000000000
 	str  r2, [r1]
 
-	bx   lr
+	pop  {r0, r1, r2, pc}
 
 max7219_init:
-	push {r0,r1,r2,lr}
+	push {r0, r1, lr}
+
 	ldr  r0, =DECODE_MODE
 	ldr  r1, =0xFF
 	bl   max7219_send
@@ -98,7 +72,7 @@ max7219_init:
 	ldr  r1, =0x1
 	bl   max7219_send
 
-	pop  {r0, r1, r2, pc}
+	pop  {r0, r1, pc}
 
 max7219_send:
 	@ input parameter: r0 is ADDRESS , r1 is DATA
@@ -132,23 +106,3 @@ max7219_send_check_done:
 	str  r2, [r1, r6] @ cs -> 0
 	str  r2, [r1, r5] @ cs -> 1
 	pop  {r0, r1, r2, r3, r4, r5, r6, r7, r8, lr}
-	bx lr
-
-display_arr:
-	mov  r0, 0x1
-	mov  r2, 0x0
-	ldr  r3, =arr
-	b    loop
-
-loop:
-	ldrb r1, [r3, r2]
-	bl   max7219_send
-
-	add  r0, 0x1
-	add  r2, 0x1
-	cmp  r2, 0x8
-	bne  loop
-
-	mov  r0, 0x1
-	mov  r2, 0x0
-	b    loop
