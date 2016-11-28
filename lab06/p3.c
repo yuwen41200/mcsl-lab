@@ -16,7 +16,7 @@ unsigned int x_pin = {X0, X1, X2, X3};
 unsigned int y_pin = {Y0, Y1, Y2, Y3};
 unsigned int total, len;
 char set[14];
-
+int rem=0;
 void set_clear()
 {
 	for (int i = 0; i < 14; i++)
@@ -135,12 +135,15 @@ int main()
 	total = 0;
 	len = 0;
 	int input = -1, prev_input = -1;
+
 	set_clear();
 
 	while (1)
 	{
 		prev_input = input;
 		input = keypad_scan();
+		if(input==0)
+			rem=1;
 		if (input == prev_input);
 		else if (input >= 14)
 		{
@@ -162,8 +165,13 @@ int main()
 			}
 			else if (input < 10 && input >= 0 && len + 1 <= 8)
 			{
-				total = total * 10 + input;
-				len += 1;
+				if(input==0&&rem==0);
+				else
+				{
+					total = total * 10 + input;
+					len += 1;
+					rem=0;
+				}
 			}
 			display(total, len);
 		}
