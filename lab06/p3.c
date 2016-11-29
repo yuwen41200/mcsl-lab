@@ -17,6 +17,7 @@ unsigned int y_pin = {Y0, Y1, Y2, Y3};
 unsigned int total, len;
 char set[14];
 int rem=0;
+
 void set_clear()
 {
 	for (int i = 0; i < 14; i++)
@@ -131,9 +132,9 @@ int main()
 	gpio_init();
 	max7219_init();
 	keypad_init();
-
 	total = 0;
 	len = 0;
+	int cnt=0;
 	int input = -1, prev_input = -1;
 
 	set_clear();
@@ -144,7 +145,16 @@ int main()
 		input = keypad_scan();
 		if(input==0)
 			rem=1;
-		if (input == prev_input);
+		if (input == prev_input)
+		{
+			cnt++;
+			if(cnt>12000)
+			{
+				cnt=0;
+				if(input<14)
+				goto A;
+			}
+		}
 		else if (input >= 14)
 		{
 			total = 0;
@@ -153,10 +163,13 @@ int main()
 			display(total, len);
 		}
 		else if (input != -1)
+		{
 			set_insert(input);
+		}
 		else
 		{
 			input = set_reduce();
+			A:
 			set_clear();
 			if (input >= 10 && len + 2 <= 8)
 			{
