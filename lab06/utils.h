@@ -22,7 +22,8 @@ int display(int data, int num_digs)
 	int data2 = data, i;
 	for (i = 1; i <= num_digs; i++)
 	{
-		if (data % 10 < 0)
+		if (data2 < 0 && i == num_digs);
+		else if (data % 10 < 0)
 			max7219_send(i, -data % 10);
 		else
 			max7219_send(i, data % 10);
