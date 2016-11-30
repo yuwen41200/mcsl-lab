@@ -14,7 +14,8 @@
 
 unsigned int x_pin = {X0, X1, X2, X3};
 unsigned int y_pin = {Y0, Y1, Y2, Y3};
-int total, len;
+float total;
+int len;
 char set[14];
 int rem = 0;
 int prev_is_num = 0;
@@ -140,13 +141,21 @@ signed char keypad_scan()
 	return -1;
 }
 
-signed int stack_num[100];
-signed int stack_ope[100];
+float stack_num[100];
+int stack_ope[100];
 int top_num = -1;
 int top_ope = -1;
 
 int main()
 {
+	asm("\
+		LDR.W R0, =0xE000ED88      ;\
+		LDR   R1, [R0]             ;\
+		ORR   R1, R1, #(0xF << 20) ;\
+		STR   R1, [R0]             ;\
+		DSB                        ;\
+		ISB                        ;\
+	");
 	gpio_init();
 	max7219_init();
 	keypad_init();
@@ -190,7 +199,7 @@ int main()
 				top_ope--;
 				if (operator == 10) // +
 				{
-					int temp1, temp2;
+					float temp1, temp2;
 					temp2 = stack_num[top_num];
 					top_num--;
 					temp1 = stack_num[top_num];
@@ -200,7 +209,7 @@ int main()
 				}
 				else if (operator == 11) // -
 				{
-					int temp1, temp2;
+					float temp1, temp2;
 					temp2 = stack_num[top_num];
 					top_num--;
 					temp1 = stack_num[top_num];
@@ -210,7 +219,7 @@ int main()
 				}
 				else if (operator == 12) // *
 				{
-					int temp1, temp2;
+					float temp1, temp2;
 					temp2 = stack_num[top_num];
 					top_num--;
 					temp1 = stack_num[top_num];
@@ -220,7 +229,7 @@ int main()
 				}
 				else if (operator == 13) // /
 				{
-					int temp1, temp2;
+					float temp1, temp2;
 					temp2 = stack_num[top_num];
 					top_num--;
 					temp1 = stack_num[top_num];
@@ -239,7 +248,7 @@ int main()
 			len = 0;
 			while (stack_ope[top_ope] == 12) // *
 			{
-				int temp1, temp2;
+				float temp1, temp2;
 				temp2 = stack_num[top_num];
 				top_num--;
 				temp1 = stack_num[top_num];
@@ -250,7 +259,7 @@ int main()
 			}
 			while (stack_ope[top_ope] == 13) // /
 			{
-				int temp1, temp2;
+				float temp1, temp2;
 				temp2 = stack_num[top_num];
 				top_num--;
 				temp1 = stack_num[top_num];
@@ -272,7 +281,7 @@ int main()
 			len = 0;
 			while (stack_ope[top_ope] == 12) // *
 			{
-				int temp1, temp2;
+				float temp1, temp2;
 				temp2 = stack_num[top_num];
 				top_num--;
 				temp1 = stack_num[top_num];
@@ -283,7 +292,7 @@ int main()
 			}
 			while (stack_ope[top_ope] == 13) // /
 			{
-				int temp1, temp2;
+				float temp1, temp2;
 				temp2 = stack_num[top_num];
 				top_num--;
 				temp1 = stack_num[top_num];
@@ -348,7 +357,7 @@ int main()
 				len = cal_len(total);
 			else if (total < 0)
 				len = cal_len(-total) + 1;
-			display(total, len);
+			displayf(total, len);
 		}
 	}
 }

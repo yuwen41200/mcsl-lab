@@ -19,10 +19,21 @@ extern void max7219_send(unsigned char address, unsigned char data);
  */
 int display(int data, int num_digs)
 {
+	int show_dec_pt = 0;
+	if (num_digs <= -1000)
+	{
+		num_digs = -1000 - num_digs ;
+		show_dec_pt = 1;
+	}
+	num_digs = num_digs > 8 ? 8 : num_digs;
 	int data2 = data, i;
 	for (i = 1; i <= num_digs; i++)
 	{
 		if (data2 < 0 && i == num_digs);
+		else if (show_dec_pt && i == 3 && data % 10 < 0)
+			max7219_send(i, -data % 10 | 0b10000000);
+		else if (show_dec_pt && i == 3)
+			max7219_send(i, data % 10 | 0b10000000);
 		else if (data % 10 < 0)
 			max7219_send(i, -data % 10);
 		else
@@ -55,6 +66,16 @@ int display(int data, int num_digs)
 
 int GPIO_ReadInputDataBit(GPIO_TypeDef *a, uint16_t b) {
 	return a->IDR & b;
+}
+
+int displayf(float data, int num_digs)
+{
+	if (num_digs > 8)
+		return display(-1, 2);
+	if ((int) (data * 100) % 100)
+		return display(data * 100, -1002 - num_digs);
+	else
+		return display(data, num_digs);
 }
 
 #endif /* UTILS_H_ */
