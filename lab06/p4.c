@@ -17,7 +17,8 @@ unsigned int y_pin = {Y0, Y1, Y2, Y3};
 int total, len;
 char set[14];
 int rem = 0;
-// int error_flag=1;
+int prev_is_num = 0;
+int error = 0;
 
 void set_clear()
 {
@@ -163,7 +164,7 @@ int main()
 		if (input == prev_input);
 		else if (input == 14) // Clear
 		{
-			for(int i = 0; i <= 99; i++)
+			for (int i = 0; i <= 99; i++)
 			{
 				stack_num[i] = 0;
 				stack_ope[i] = 0;
@@ -173,10 +174,13 @@ int main()
 			total = 0;
 			len = 0;
 			set_clear();
+			prev_is_num = 0;
+			error = 0;
 			display(total, len);
 		}
-		else if(input == 15) // =
+		else if (input == 15) // =
 		{
+			error = prev_is_num ? error : 1;
 			top_num++;
 			stack_num[top_num] = total;
 			while (top_ope != -1)
@@ -225,11 +229,7 @@ int main()
 					stack_num[top_num] = temp1 / temp2;
 				}
 			}
-			total = stack_num[top_num];
-			// if (error_flag == 1)
-			// {
-			//     total=-1;
-			// }
+			total = error ? -1 : stack_num[top_num];
 		}
 		else if (input == 10) // +
 		{
@@ -261,6 +261,8 @@ int main()
 			}
 			top_ope++;
 			stack_ope[top_ope] = 10; // +
+			error = prev_is_num ? error : 1;
+			prev_is_num = 0;
 		}
 		else if (input == 11) // -
 		{
@@ -292,6 +294,8 @@ int main()
 			}
 			top_ope++;
 			stack_ope[top_ope] = 11; // -
+			error = prev_is_num ? error : 1;
+			prev_is_num = 0;
 		}
 		else if (input == 12) // *
 		{
@@ -301,6 +305,8 @@ int main()
 			total = 0;
 			len = 0;
 			stack_ope[top_ope] = 12; // *
+			error = prev_is_num ? error : 1;
+			prev_is_num = 0;
 		}
 		else if (input == 13) // /
 		{
@@ -310,6 +316,8 @@ int main()
 			total = 0;
 			len = 0;
 			stack_ope[top_ope] = 13; // /
+			error = prev_is_num ? error : 1;
+			prev_is_num = 0;
 		}
 		else if (input != -1)
 		{
@@ -319,6 +327,8 @@ int main()
 		{
 			input = set_reduce();
 			set_clear();
+			if ((input < 10 && input >= 1) || (!input && rem))
+				prev_is_num = 1;
 			if (input >= 10 && len + 2 <= 3)
 			{
 				total = total * 100 + input;
@@ -326,7 +336,7 @@ int main()
 			}
 			else if (input < 10 && input >= 0 && len + 1 <= 3)
 			{
-				if(input == 0 && rem == 0);
+				if (input == 0 && rem == 0);
 				else
 				{
 					total = total * 10 + input;
