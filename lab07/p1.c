@@ -3,6 +3,7 @@
 
 int plln = 16, pllm = 7, prescaler = 9;
 enum {S1MHZ, S6MHz, S10MHZ, S16MHZ, S40MHZ} state = S1MHZ;
+int prev_btn = 1, curr_btn = 1;
 
 void SystemClock_Config();
 
@@ -12,7 +13,7 @@ int main()
 	gpio_init();
 	while (1)
 	{
-		if (!GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_13))
+		if (!prev_btn && curr_btn)
 		{
 			switch (state)
 			{
@@ -51,6 +52,8 @@ int main()
 		delay_1s();
 		GPIOA->BRR = (1 << 5);
 		delay_1s();
+		prev_btn = curr_btn;
+		curr_btn = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_13);
 	}
 }
 
