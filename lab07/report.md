@@ -719,27 +719,21 @@ fpu_enable:
 
 ## 實驗結果與問題回答 ##
 
-### Postfix Arithmetic ###
+### Modify system initial clock ###
 
-![p1a](p1a.png)
+* 根據文件的指示改變系統 clock，觀察 LED 燈閃爍速率的變化。
 
-* 先執行 `strlen`，但是這個步驟其實沒有什麼意義，只不過是為了展示我們有正確地實作出 `strlen` 而已。
-* 再執行 `memcpy`，將 `postfix_expr` 從唯讀的 text segment 複製到可寫入的 data segment，  
-  同時將所有的空格取代為 `\0`。
-* 最後執行 `arithmetic`，依照 postfix 的規則操作 stack，如果遇到運算元會先呼叫 `atoi` 將其轉換為數值。
-* 錯誤處理的部份，`-100·10abc·+·-·10·+` 或 `-100·10·20·+·-·1000` 皆會判斷為錯誤，  
-  `··-100··10·20··+··-·10···+·` 則能夠正確計算。（符號 `·` 表示空格。）
+### 計時器 ###
 
-### 求最大公因數並計算最多用了多少 Stack Size ###
+* 根據 ARR 和 prescaler 的 CNT，每 0.01 秒加 1，顯示在七段顯示器上。
+* 七段顯示器的第三位加上小數點。
 
-![p2a](p2a.png)
+### Music keypad ###
 
-* 依照 Stein's algorithm 計算 GCD，每次呼叫函式之前，都會先將函式的兩個參數及當前的 link register 存進 stack，  
-  函式回傳之後再將它們取出。
-* 因此每進入一層遞迴，便會多占用 12 位元組的 stack 空間。
+* 採用課程投影片上的說明，變化 prescaler 來改變頻率。
 
 ## 心得討論與應用聯想 ##
 
-* 第一題的 `postfix_expr` 長度（包含 `\0`）必需是 4 的倍數，否則在 assemble 時會出現錯誤（沒有 alignment）。
-* 第二題的 `max_size` 應該沒有標準答案，因為題目並沒有限制 stack 只能存放哪些資料。
+* 改變 duty cycle 會改變音色。
+* 時間完全不夠。
 * 這門課不但讓我學了微處理機，還讓我學了危機處理，雖然這門課已經改為選修了，不過我一定會推薦學弟妹來修的。
