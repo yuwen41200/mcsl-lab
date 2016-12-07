@@ -8,6 +8,7 @@ extern void gpio_init();
 extern void max7219_init();
 extern void max7219_send(unsigned char address, unsigned char data);
 extern void delay_1s();
+extern void fpu_enable();
 
 /**
  * show data on 7-segment display via max7219_send
@@ -141,5 +142,123 @@ typedef struct
 	uint32_t APB1CLKDivider; // The APB1 clock (PCLK1) divider
 	uint32_t APB2CLKDivider; // The APB2 clock (PCLK2) divider
 } RCC_ClkInitTypeDef;
+
+/**
+ * calculate length of number
+ */
+int len(int n)
+{
+	int sum = 0;
+	while (n > 0)
+	{
+		n /= 10;
+		sum++;
+	}
+	return sum;
+}
+
+/**
+ * keypad settings, used by keypad_scan
+ */
+#define XPORT GPIOC
+#define YPORT GPIOB
+#define X0 GPIO_Pin_0
+#define X1 GPIO_Pin_1
+#define X2 GPIO_Pin_2
+#define X3 GPIO_Pin_3
+#define Y0 GPIO_Pin_6
+#define Y1 GPIO_Pin_5
+#define Y2 GPIO_Pin_4
+#define Y3 GPIO_Pin_3
+
+/**
+ * initialize keypad GPIO pin, X as output and Y as input
+ */
+void keypad_init()
+{
+	RCC->AHB2ENR   |= 0b00000000000000000000000000000110;
+
+	GPIOC->MODER   &= 0b11111111111111111111111100000000;
+	GPIOC->MODER   |= 0b00000000000000000000000001010101;
+	GPIOC->PUPDR   &= 0b11111111111111111111111100000000;
+	GPIOC->PUPDR   |= 0b00000000000000000000000001010101;
+	GPIOC->OSPEEDR &= 0b11111111111111111111111100000000;
+	GPIOC->OSPEEDR |= 0b00000000000000000000000001010101;
+	GPIOC->ODR     |= 0b00000000000000000000000000001111;
+
+	GPIOB->MODER   &= 0b11111111111111111100000000111111;
+	GPIOB->PUPDR   &= 0b11111111111111111100000000111111;
+	GPIOB->PUPDR   |= 0b00000000000000000010101010000000;
+	GPIOB->OSPEEDR &= 0b11111111111111111111111100000000;
+	GPIOB->OSPEEDR |= 0b00000000000000000000000001010101;
+}
+
+/**
+ * scan keypad value
+ *
+ * return:
+ *   >=0: key press value
+ *   -1: no key press
+ */
+signed char keypad_scan()
+{
+	XPORT->BSRR = X0;
+	XPORT->BRR  = X1;
+	XPORT->BRR  = X2;
+	XPORT->BRR  = X3;
+
+	if (GPIO_ReadInputDataBit(YPORT, Y0))
+		return 15;
+	if (GPIO_ReadInputDataBit(YPORT, Y1))
+		return 7;
+	if (GPIO_ReadInputDataBit(YPORT, Y2))
+		return 4;
+	if (GPIO_ReadInputDataBit(YPORT, Y3))
+		return 1;
+
+	XPORT->BRR  = X0;
+	XPORT->BSRR = X1;
+	XPORT->BRR  = X2;
+	XPORT->BRR  = X3;
+
+	if (GPIO_ReadInputDataBit(YPORT, Y0))
+		return 0;
+	if (GPIO_ReadInputDataBit(YPORT, Y1))
+		return 8;
+	if (GPIO_ReadInputDataBit(YPORT, Y2))
+		return 5;
+	if (GPIO_ReadInputDataBit(YPORT, Y3))
+		return 2;
+
+	XPORT->BRR  = X0;
+	XPORT->BRR  = X1;
+	XPORT->BSRR = X2;
+	XPORT->BRR  = X3;
+
+	if (GPIO_ReadInputDataBit(YPORT, Y0))
+		return 14;
+	if (GPIO_ReadInputDataBit(YPORT, Y1))
+		return 9;
+	if (GPIO_ReadInputDataBit(YPORT, Y2))
+		return 6;
+	if (GPIO_ReadInputDataBit(YPORT, Y3))
+		return 3;
+
+	XPORT->BRR  = X0;
+	XPORT->BRR  = X1;
+	XPORT->BRR  = X2;
+	XPORT->BSRR = X3;
+
+	if (GPIO_ReadInputDataBit(YPORT, Y0))
+		return 13;
+	if (GPIO_ReadInputDataBit(YPORT, Y1))
+		return 12;
+	if (GPIO_ReadInputDataBit(YPORT, Y2))
+		return 11;
+	if (GPIO_ReadInputDataBit(YPORT, Y3))
+		return 10;
+
+	return -1;
+}
 
 #endif /* UTILS_H_ */

@@ -7,6 +7,7 @@
 	.global max7219_init
 	.global max7219_send
 	.global delay_1s
+	.global fpu_enable
 
 	.equ RCC_AHB2ENR,  0x4002104C
 
@@ -24,12 +25,16 @@
 	.equ BSRR_OFFSET,  0x18 @ set bit
 	.equ BRR_OFFSET,   0x28 @ clear bit
 
+	.equ GPIOB_BASE,   0x48000400
+	.equ AFRL_OFFSET,  0x20
+	.equ AFRH_OFFSET,  0x24
+
 	.equ GPIOC_BASE,   0x48000800
 
 gpio_init:
 	push {r0, r1, r2, lr}
 
-	mov  r0, 0b00000000000000000000000000000101
+	mov  r0, 0b00000000000000000000000000000111
 	ldr  r1, =RCC_AHB2ENR
 	str  r0, [r1]
 
@@ -48,6 +53,18 @@ gpio_init:
 	ldr  r2, [r1]
 	and  r2, 0b11111111111111110000001111111111
 	orr  r2, 0b00000000000000000101010000000000
+	str  r2, [r1]
+
+	ldr  r1, =GPIOB_BASE @ GPIOB_MODER
+	ldr  r2, [r1]
+	and  r2, 0b11111111111111001111111111111111
+	orr  r2, 0b00000000000000010000000000000000
+	str  r2, [r1]
+
+	add  r1, 0x4 @ GPIOB_SPEEDER
+	ldr  r2, [r1]
+	and  r2, 0b11111111111111001111111111111111
+	orr  r2, 0b00000000000000010000000000000000
 	str  r2, [r1]
 
 	ldr  r1, =GPIOC_BASE @ GPIOC_MODER
@@ -128,3 +145,13 @@ delay_1s_loop:
 
 delay_1s_end:
 	pop  {r0, pc}
+
+fpu_enable:
+	push  {r0, r1, lr}
+	ldr.w r0, =0xE000ED88
+	ldr   r1, [r0]
+	orr   r1, r1, #(0xF << 20)
+	str   r1, [r0]
+	dsb
+	isb
+	pop   {r0, r1, pc}
