@@ -12,12 +12,13 @@
 
 float freq = -1;
 int curr = -2, prev = -3, check = -4;
+int duty_cycle = 50;
 
 void timer_init()
 {
 	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN;
-	TIM2->ARR = (uint32_t) 40000;
-	TIM2->PSC = (uint32_t) (4000000 / freq / 2);
+	TIM2->ARR = (uint32_t) 100;
+	TIM2->PSC = (uint32_t) (4000000 / freq / 100);
 	TIM2->EGR = TIM_EGR_UG;
 }
 
@@ -81,6 +82,12 @@ void timer_start()
 			timer_init();
 			TIM2->CR1 |= TIM_CR1_CEN;
 			break;
+		case 10:
+			duty_cycle = duty_cycle == 90 ? duty_cycle : duty_cycle + 5;
+			break;
+		case 11:
+			duty_cycle = duty_cycle == 10 ? duty_cycle : duty_cycle - 5;
+			break;
 		case 86400:
 			break;
 		default:
@@ -90,7 +97,7 @@ void timer_start()
 		}
 		if (freq > 0)
 		{
-			if (TIM2->CNT % 2)
+			if (TIM2->CNT < duty_cycle)
 				GPIOB->BSRR = (1 << 8);
 			else
 				GPIOB->BRR = (1 << 8);
