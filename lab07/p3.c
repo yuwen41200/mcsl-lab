@@ -17,12 +17,36 @@ int duty_cycle = 50;
 void timer_init()
 {
 	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN;
+	// enable TIM2 timer clock
+	GPIOB->AFR[0] |= GPIO_AFRL_AFSEL3_0;
+	// select AF1 for PB3 (PB3 is TIM2_CH2)
+	TIM2->CR1 |= TIM_CR1_DIR;
+	// counter used as downcounter
+	TIM2->CR1 |= TIM_CR1_ARPE;
+	// enable auto-reload preload (buffer TIM2_ARR)
 	TIM2->ARR = (uint32_t) 100;
-	TIM2->PSC = (uint32_t) (4000000 / freq / 100);
+	// auto-reload prescaler value
+	TIM2->CCMR1 &= 0xFFFFFCFF;
+	// select compare 2 (channel 2 is configured as output)
+	TIM2->CCMR1 |= (TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1);
+	// set output compare 2 mode to PWM mode 1
+	TIM2->CCMR1 |= TIM_CCMR1_OC2PE;
+	// enable output compare 2 preload register on TIM2_CCR2
+	TIM2->CCER |= TIM_CCER_CC2E;
+	// enable compare 2 output
 	TIM2->EGR = TIM_EGR_UG;
+	// re-initialize the counter and generates an update of the registers
 }
 
-void timer_start()
+void timer_config()
+{
+	TIM2->PSC = (uint32_t) (4000000 / freq / 100);
+	// prescaler value
+	TIM2->CCR2 = duty_cycle;
+	// compare 2 preload value
+}
+
+void keypad_ctrl()
 {
 	while (1)
 	{
@@ -35,51 +59,43 @@ void timer_start()
 		switch (check)
 		{
 		case 1:
-			TIM2->CR1 &= ~TIM_CR1_CEN;
 			freq = DO;
-			timer_init();
+			timer_config();
 			TIM2->CR1 |= TIM_CR1_CEN;
 			break;
 		case 2:
-			TIM2->CR1 &= ~TIM_CR1_CEN;
 			freq = RE;
-			timer_init();
+			timer_config();
 			TIM2->CR1 |= TIM_CR1_CEN;
 			break;
 		case 3:
-			TIM2->CR1 &= ~TIM_CR1_CEN;
 			freq = MI;
-			timer_init();
+			timer_config();
 			TIM2->CR1 |= TIM_CR1_CEN;
 			break;
 		case 4:
-			TIM2->CR1 &= ~TIM_CR1_CEN;
 			freq = FA;
-			timer_init();
+			timer_config();
 			TIM2->CR1 |= TIM_CR1_CEN;
 			break;
 		case 5:
-			TIM2->CR1 &= ~TIM_CR1_CEN;
 			freq = SO;
-			timer_init();
+			timer_config();
 			TIM2->CR1 |= TIM_CR1_CEN;
 			break;
 		case 6:
-			TIM2->CR1 &= ~TIM_CR1_CEN;
 			freq = LA;
-			timer_init();
+			timer_config();
 			TIM2->CR1 |= TIM_CR1_CEN;
 			break;
 		case 7:
-			TIM2->CR1 &= ~TIM_CR1_CEN;
 			freq = SI;
-			timer_init();
+			timer_config();
 			TIM2->CR1 |= TIM_CR1_CEN;
 			break;
 		case 8:
-			TIM2->CR1 &= ~TIM_CR1_CEN;
 			freq = HI_DO;
-			timer_init();
+			timer_config();
 			TIM2->CR1 |= TIM_CR1_CEN;
 			break;
 		case 10:
@@ -95,15 +111,6 @@ void timer_start()
 			freq = -1;
 			break;
 		}
-		if (freq > 0)
-		{
-			if (TIM2->CNT < duty_cycle)
-				GPIOB->BSRR = (1 << 8);
-			else
-				GPIOB->BRR = (1 << 8);
-		}
-		else
-			GPIOB->BRR = (1 << 8);
 	}
 }
 
@@ -112,5 +119,6 @@ int main()
 	fpu_enable();
 	gpio_init();
 	keypad_init();
-	timer_start();
+	timer_init();
+	keypad_ctrl();
 }
