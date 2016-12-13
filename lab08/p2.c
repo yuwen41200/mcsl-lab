@@ -12,6 +12,8 @@ int main()
 {
 	SysTick_UserConfig();
 	gpio_init();
+	max7219_init();
+	keypad_init();
 	exti_init();
 	while (1)
 		display(key_value, 2);
@@ -20,7 +22,7 @@ int main()
 void SysTick_UserConfig()
 {
 	SysTick->CTRL |= 0x00000004;
-	SysTick->LOAD = 100000; // 0.1 second
+	SysTick->LOAD = 400000; // 0.1 second
 	SysTick->VAL = 0;
 	SysTick->CTRL |= 0x00000003;
 }

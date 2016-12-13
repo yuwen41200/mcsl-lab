@@ -1,6 +1,8 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
+#include "stm32l476xx.h"
+
 /**
  * these functions are inside the assembly source file
  */
