@@ -5,13 +5,13 @@ int plln = 40, pllm = 7, prescaler = 0; // 10 MHz SYSCLK
 int prev_btn = 1, curr_btn = 1;
 
 void SystemClock_Config();
-void SysTick_Config();
+void SysTick_UserConfig();
 void SysTick_Handler();
 
 int main()
 {
 	SystemClock_Config();
-	SysTick_Config();
+	SysTick_UserConfig();
 	gpio_init();
 	while (1)
 	{
@@ -49,7 +49,7 @@ void SystemClock_Config()
 	// AHB prescaler: SYSCLK divided by N
 }
 
-void SysTick_Config()
+void SysTick_UserConfig()
 {
 	SysTick->CTRL |= 0x00000004;
 	SysTick->LOAD = 5000000; // 0.5 second
