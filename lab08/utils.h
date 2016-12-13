@@ -290,15 +290,15 @@ void exti_init()
 	// EXTI4_IRQn = 10
 	// EXTI9_5_IRQn = 23
 	uint32_t *ptr;
-	ptr = NVIC_ISER;
-	ptr[0] = (ptr[0] & 0xFFFFFBFF) | (ptr[0] & 0x00000400);
-	ptr[0] = (ptr[0] & 0xFF7FFFFF) | (ptr[0] & 0x00800000);
-	ptr = NVIC_IPR;
-	ptr[2] = (ptr[2] & 0xFF00FFFF) | (ptr[2] & 0x00500000);
-	ptr[5] = (ptr[5] & 0x00FFFFFF) | (ptr[5] & 0x50000000);
-	ptr = NVIC_ICPR;
-	ptr[0] = (ptr[0] & 0xFFFFFBFF) | (ptr[0] & 0x00000400);
-	ptr[0] = (ptr[0] & 0xFF7FFFFF) | (ptr[0] & 0x00800000);
+	ptr = (uint32_t *) NVIC_IPR;
+	ptr[2] = 0x00100000;
+	ptr[5] = 0x10000000;
+	ptr = (uint32_t *) NVIC_ICPR;
+	ptr[0] = 0x00000400;
+	ptr[0] = 0x00800000;
+	ptr = (uint32_t *) NVIC_ISER;
+	ptr[0] = 0x00000400;
+	ptr[0] = 0x00800000;
 }
 
 #endif /* UTILS_H_ */

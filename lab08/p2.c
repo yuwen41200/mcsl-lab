@@ -63,6 +63,11 @@ void SysTick_Handler()
 
 void EXTI4_IRQHandler()
 {
+	uint32_t *ptr;
+	ptr = (uint32_t *) NVIC_ICPR;
+	ptr[0] = 0x00000400;
+	ptr[0] = 0x00800000;
+	EXTI->PR1 |= EXTI_PR1_PIF4 | EXTI_PR1_PIF5 | EXTI_PR1_PIF6 | EXTI_PR1_PIF7;
 	switch (scan_state)
 	{
 	case 0:
@@ -110,6 +115,11 @@ void EXTI4_IRQHandler()
 
 void EXTI9_5_IRQHandler()
 {
+	uint32_t *ptr;
+	ptr = (uint32_t *) NVIC_ICPR;
+	ptr[0] = 0x00000400;
+	ptr[0] = 0x00800000;
+	EXTI->PR1 |= EXTI_PR1_PIF4 | EXTI_PR1_PIF5 | EXTI_PR1_PIF6 | EXTI_PR1_PIF7;
 	switch (scan_state)
 	{
 	case 0:

@@ -10,6 +10,7 @@
 	.global fpu_enable
 
 	.equ RCC_AHB2ENR,  0x4002104C
+	.equ RCC_APB2ENR,  0x40021060
 
 	.equ DECODE_MODE,  0x09
 	.equ DISPLAY_TEST, 0x0F
@@ -36,6 +37,10 @@ gpio_init:
 
 	mov  r0, 0b00000000000000000000000000000111
 	ldr  r1, =RCC_AHB2ENR
+	str  r0, [r1]
+
+	mov  r0, 0b00000000000000000000000000000001
+	ldr  r1, =RCC_APB2ENR
 	str  r0, [r1]
 
 	ldr  r1, =GPIOA_BASE @ GPIOA_MODER
