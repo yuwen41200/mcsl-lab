@@ -261,12 +261,42 @@ signed char keypad_scan()
 	return -1;
 }
 
-void exti_setup()
+/**
+ * NVIC register addresses
+ */
+#define NVIC_ISER 0xE000E100 // interrupt set-enable registers
+#define NVIC_ICPR 0xE000E280 // interrupt clear-pending registers
+#define NVIC_IPR  0xE000E400 // interrupt priority registers
+
+/**
+ * initialize EXTI interrupts
+ */
+void exti_init()
 {
+	// setup SYSCFG
 	SYSCFG->EXTICR[1] = SYSCFG_EXTICR2_EXTI4_PB | SYSCFG_EXTICR2_EXTI5_PB | SYSCFG_EXTICR2_EXTI6_PB | SYSCFG_EXTICR2_EXTI7_PB;
+
+	// setup EXTI
 	EXTI->IMR1 |= EXTI_IMR1_IM4 | EXTI_IMR1_IM5 | EXTI_IMR1_IM6 | EXTI_IMR1_IM7;
 	EXTI->FTSR1 |= EXTI_FTSR1_FT4 | EXTI_FTSR1_FT5 | EXTI_FTSR1_FT6 | EXTI_FTSR1_FT7;
 	EXTI->PR1 |= EXTI_PR1_PIF4 | EXTI_PR1_PIF5 | EXTI_PR1_PIF6 | EXTI_PR1_PIF7;
+
+	// enable interrupts
+	asm("cpsie i;");
+
+	// setup NVIC
+	// EXTI4_IRQn = 10
+	// EXTI9_5_IRQn = 23
+	uint32_t *ptr;
+	ptr = NVIC_ISER;
+	ptr[0] = (ptr[0] & 0xFFFFFBFF) | (ptr[0] & 0x00000400);
+	ptr[0] = (ptr[0] & 0xFF7FFFFF) | (ptr[0] & 0x00800000);
+	ptr = NVIC_IPR;
+	ptr[2] = (ptr[2] & 0xFF00FFFF) | (ptr[2] & 0x00500000);
+	ptr[5] = (ptr[5] & 0x00FFFFFF) | (ptr[5] & 0x50000000);
+	ptr = NVIC_ICPR;
+	ptr[0] = (ptr[0] & 0xFFFFFBFF) | (ptr[0] & 0x00000400);
+	ptr[0] = (ptr[0] & 0xFF7FFFFF) | (ptr[0] & 0x00800000);
 }
 
 #endif /* UTILS_H_ */

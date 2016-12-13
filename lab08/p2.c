@@ -1,63 +1,154 @@
 #include "stm32l476xx.h"
 #include "utils.h"
 
-int plln = 40, pllm = 7, prescaler = 0; // 10 MHz SYSCLK
-int prev_btn = 1, curr_btn = 1;
+int scan_state = 0, key_value = 0;
 
-void SystemClock_Config();
-void SysTick_Config();
+void SysTick_UserConfig();
 void SysTick_Handler();
+void EXTI4_IRQHandler();
+void EXTI9_5_IRQHandler();
 
 int main()
 {
-	SystemClock_Config();
-	SysTick_Config();
+	SysTick_UserConfig();
 	gpio_init();
+	exti_init();
 	while (1)
-	{
-		if (!prev_btn && curr_btn)
-			SysTick->CTRL = (SysTick->CTRL & 0xFFFFFFFE) | ~(SysTick->CTRL & 0x00000001);
-		prev_btn = curr_btn;
-		curr_btn = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_13);
-	}
+		display(key_value, 2);
 }
 
-void SystemClock_Config()
-{
-	RCC->CFGR = 0x00000000;
-	// CFGR reset value
-	RCC->CR &= 0xFEFFFFFF;
-	// main PLL enable: PLL off
-	while (RCC->CR & 0x02000000);
-	// main PLL clock ready flag: PLL locked
-	RCC->PLLCFGR = 0x01000001;
-	// main PLL PLLCLK output enable: PLLCLK output enable
-	// main PLL entry clock source: MSI clock selected as PLL clock entry
-	RCC->PLLCFGR |= plln << 8;
-	// main PLL multiplication factor for VCO
-	RCC->PLLCFGR |= pllm << 4;
-	// division factor for the main PLL input clock
-	// f(VCO clock) = f(PLL clock input) × (PLLN / PLLM)
-	// f(PLL_R) = f(VCO clock) / PLLR
-	RCC->CR |= 0x01000000;
-	// main PLL enable: PLL on
-	while (!(RCC->CR & 0x02000000));
-	// main PLL clock ready flag: PLL locked
-	RCC->CFGR = 0x00000003;
-	// system clock switch: PLL selected as system clock
-	RCC->CFGR |= prescaler << 4;
-	// AHB prescaler: SYSCLK divided by N
-}
-
-void SysTick_Config()
+void SysTick_UserConfig()
 {
 	SysTick->CTRL |= 0x00000004;
-	SysTick->LOAD = 5000000; // 0.5 second
+	SysTick->LOAD = 100000; // 0.1 second
 	SysTick->VAL = 0;
 	SysTick->CTRL |= 0x00000003;
 }
 
 void SysTick_Handler()
 {
-	GPIOA->ODR = (GPIOA->ODR & 0xFFFFFFDF) | ~(GPIOA->ODR & 0x00000020);
+	EXTI->IMR1 ^= EXTI_IMR1_IM4 | EXTI_IMR1_IM5 | EXTI_IMR1_IM6 | EXTI_IMR1_IM7;
+	scan_state = scan_state == 3 ? 0 : scan_state + 1;
+	switch (scan_state)
+	{
+	case 0:
+		XPORT->BSRR = X0;
+		XPORT->BRR  = X1;
+		XPORT->BRR  = X2;
+		XPORT->BRR  = X3;
+		break;
+	case 1:
+		XPORT->BRR  = X0;
+		XPORT->BSRR = X1;
+		XPORT->BRR  = X2;
+		XPORT->BRR  = X3;
+		break;
+	case 2:
+		XPORT->BRR  = X0;
+		XPORT->BRR  = X1;
+		XPORT->BSRR = X2;
+		XPORT->BRR  = X3;
+		break;
+	case 3:
+		XPORT->BRR  = X0;
+		XPORT->BRR  = X1;
+		XPORT->BRR  = X2;
+		XPORT->BSRR = X3;
+		break;
+	}
+	EXTI->IMR1 |= EXTI_IMR1_IM4 | EXTI_IMR1_IM5 | EXTI_IMR1_IM6 | EXTI_IMR1_IM7;
+}
+
+void EXTI4_IRQHandler()
+{
+	switch (scan_state)
+	{
+	case 0:
+		if (GPIO_ReadInputDataBit(YPORT, Y0))
+			key_value = 15;
+		if (GPIO_ReadInputDataBit(YPORT, Y1))
+			key_value = 7;
+		if (GPIO_ReadInputDataBit(YPORT, Y2))
+			key_value = 4;
+		if (GPIO_ReadInputDataBit(YPORT, Y3))
+			key_value = 1;
+		break;
+	case 1:
+		if (GPIO_ReadInputDataBit(YPORT, Y0))
+			key_value = 0;
+		if (GPIO_ReadInputDataBit(YPORT, Y1))
+			key_value = 8;
+		if (GPIO_ReadInputDataBit(YPORT, Y2))
+			key_value = 5;
+		if (GPIO_ReadInputDataBit(YPORT, Y3))
+			key_value = 2;
+		break;
+	case 2:
+		if (GPIO_ReadInputDataBit(YPORT, Y0))
+			key_value = 14;
+		if (GPIO_ReadInputDataBit(YPORT, Y1))
+			key_value = 9;
+		if (GPIO_ReadInputDataBit(YPORT, Y2))
+			key_value = 6;
+		if (GPIO_ReadInputDataBit(YPORT, Y3))
+			key_value = 3;
+		break;
+	case 3:
+		if (GPIO_ReadInputDataBit(YPORT, Y0))
+			key_value = 13;
+		if (GPIO_ReadInputDataBit(YPORT, Y1))
+			key_value = 12;
+		if (GPIO_ReadInputDataBit(YPORT, Y2))
+			key_value = 11;
+		if (GPIO_ReadInputDataBit(YPORT, Y3))
+			key_value = 10;
+		break;
+	}
+}
+
+void EXTI9_5_IRQHandler()
+{
+	switch (scan_state)
+	{
+	case 0:
+		if (GPIO_ReadInputDataBit(YPORT, Y0))
+			key_value = 15;
+		if (GPIO_ReadInputDataBit(YPORT, Y1))
+			key_value = 7;
+		if (GPIO_ReadInputDataBit(YPORT, Y2))
+			key_value = 4;
+		if (GPIO_ReadInputDataBit(YPORT, Y3))
+			key_value = 1;
+		break;
+	case 1:
+		if (GPIO_ReadInputDataBit(YPORT, Y0))
+			key_value = 0;
+		if (GPIO_ReadInputDataBit(YPORT, Y1))
+			key_value = 8;
+		if (GPIO_ReadInputDataBit(YPORT, Y2))
+			key_value = 5;
+		if (GPIO_ReadInputDataBit(YPORT, Y3))
+			key_value = 2;
+		break;
+	case 2:
+		if (GPIO_ReadInputDataBit(YPORT, Y0))
+			key_value = 14;
+		if (GPIO_ReadInputDataBit(YPORT, Y1))
+			key_value = 9;
+		if (GPIO_ReadInputDataBit(YPORT, Y2))
+			key_value = 6;
+		if (GPIO_ReadInputDataBit(YPORT, Y3))
+			key_value = 3;
+		break;
+	case 3:
+		if (GPIO_ReadInputDataBit(YPORT, Y0))
+			key_value = 13;
+		if (GPIO_ReadInputDataBit(YPORT, Y1))
+			key_value = 12;
+		if (GPIO_ReadInputDataBit(YPORT, Y2))
+			key_value = 11;
+		if (GPIO_ReadInputDataBit(YPORT, Y3))
+			key_value = 10;
+		break;
+	}
 }
