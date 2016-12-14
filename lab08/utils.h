@@ -148,7 +148,7 @@ typedef struct
 /**
  * calculate length of number
  */
-int len(int n)
+int cal_len(int n)
 {
 	int sum = 0;
 	while (n > 0)
