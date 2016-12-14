@@ -1,7 +1,7 @@
 #include "stm32l476xx.h"
 #include "utils.h"
 
-int scan_state = 0, key_value = 0;
+int scan_state = 0, key_value = 0, prev = 0;
 
 void SysTick_UserConfig();
 void SysTick_Handler();
@@ -16,7 +16,10 @@ int main()
 	keypad_init();
 	exti_init();
 	while (1)
+	{
 		display(key_value, 2);
+		prev = YPORT->IDR;
+	}
 }
 
 void SysTick_UserConfig()
@@ -66,48 +69,48 @@ void EXTI4_IRQHandler()
 	uint32_t *ptr;
 	ptr = (uint32_t *) NVIC_ICPR;
 	ptr[0] = 0x00000400;
-	ptr[0] = 0x00800000;
-	EXTI->PR1 |= EXTI_PR1_PIF4 | EXTI_PR1_PIF5 | EXTI_PR1_PIF6 | EXTI_PR1_PIF7;
+	EXTI->PR1 |= EXTI_PR1_PIF4;
+	int now = YPORT->IDR;
 	switch (scan_state)
 	{
 	case 0:
-		if (GPIO_ReadInputDataBit(YPORT, Y0))
+		if ((prev & Y0) && !(now & Y0))
 			key_value = 15;
-		if (GPIO_ReadInputDataBit(YPORT, Y1))
+		if ((prev & Y1) && !(now & Y1))
 			key_value = 7;
-		if (GPIO_ReadInputDataBit(YPORT, Y2))
+		if ((prev & Y2) && !(now & Y2))
 			key_value = 4;
-		if (GPIO_ReadInputDataBit(YPORT, Y3))
+		if ((prev & Y3) && !(now & Y3))
 			key_value = 1;
 		break;
 	case 1:
-		if (GPIO_ReadInputDataBit(YPORT, Y0))
+		if ((prev & Y0) && !(now & Y0))
 			key_value = 0;
-		if (GPIO_ReadInputDataBit(YPORT, Y1))
+		if ((prev & Y1) && !(now & Y1))
 			key_value = 8;
-		if (GPIO_ReadInputDataBit(YPORT, Y2))
+		if ((prev & Y2) && !(now & Y2))
 			key_value = 5;
-		if (GPIO_ReadInputDataBit(YPORT, Y3))
+		if ((prev & Y3) && !(now & Y3))
 			key_value = 2;
 		break;
 	case 2:
-		if (GPIO_ReadInputDataBit(YPORT, Y0))
+		if ((prev & Y0) && !(now & Y0))
 			key_value = 14;
-		if (GPIO_ReadInputDataBit(YPORT, Y1))
+		if ((prev & Y1) && !(now & Y1))
 			key_value = 9;
-		if (GPIO_ReadInputDataBit(YPORT, Y2))
+		if ((prev & Y2) && !(now & Y2))
 			key_value = 6;
-		if (GPIO_ReadInputDataBit(YPORT, Y3))
+		if ((prev & Y3) && !(now & Y3))
 			key_value = 3;
 		break;
 	case 3:
-		if (GPIO_ReadInputDataBit(YPORT, Y0))
+		if ((prev & Y0) && !(now & Y0))
 			key_value = 13;
-		if (GPIO_ReadInputDataBit(YPORT, Y1))
+		if ((prev & Y1) && !(now & Y1))
 			key_value = 12;
-		if (GPIO_ReadInputDataBit(YPORT, Y2))
+		if ((prev & Y2) && !(now & Y2))
 			key_value = 11;
-		if (GPIO_ReadInputDataBit(YPORT, Y3))
+		if ((prev & Y3) && !(now & Y3))
 			key_value = 10;
 		break;
 	}
@@ -117,49 +120,49 @@ void EXTI9_5_IRQHandler()
 {
 	uint32_t *ptr;
 	ptr = (uint32_t *) NVIC_ICPR;
-	ptr[0] = 0x00000400;
 	ptr[0] = 0x00800000;
-	EXTI->PR1 |= EXTI_PR1_PIF4 | EXTI_PR1_PIF5 | EXTI_PR1_PIF6 | EXTI_PR1_PIF7;
+	EXTI->PR1 |= EXTI_PR1_PIF5 | EXTI_PR1_PIF6 | EXTI_PR1_PIF7;
+	int now = YPORT->IDR;
 	switch (scan_state)
 	{
 	case 0:
-		if (GPIO_ReadInputDataBit(YPORT, Y0))
+		if ((prev & Y0) && !(now & Y0))
 			key_value = 15;
-		if (GPIO_ReadInputDataBit(YPORT, Y1))
+		if ((prev & Y1) && !(now & Y1))
 			key_value = 7;
-		if (GPIO_ReadInputDataBit(YPORT, Y2))
+		if ((prev & Y2) && !(now & Y2))
 			key_value = 4;
-		if (GPIO_ReadInputDataBit(YPORT, Y3))
+		if ((prev & Y3) && !(now & Y3))
 			key_value = 1;
 		break;
 	case 1:
-		if (GPIO_ReadInputDataBit(YPORT, Y0))
+		if ((prev & Y0) && !(now & Y0))
 			key_value = 0;
-		if (GPIO_ReadInputDataBit(YPORT, Y1))
+		if ((prev & Y1) && !(now & Y1))
 			key_value = 8;
-		if (GPIO_ReadInputDataBit(YPORT, Y2))
+		if ((prev & Y2) && !(now & Y2))
 			key_value = 5;
-		if (GPIO_ReadInputDataBit(YPORT, Y3))
+		if ((prev & Y3) && !(now & Y3))
 			key_value = 2;
 		break;
 	case 2:
-		if (GPIO_ReadInputDataBit(YPORT, Y0))
+		if ((prev & Y0) && !(now & Y0))
 			key_value = 14;
-		if (GPIO_ReadInputDataBit(YPORT, Y1))
+		if ((prev & Y1) && !(now & Y1))
 			key_value = 9;
-		if (GPIO_ReadInputDataBit(YPORT, Y2))
+		if ((prev & Y2) && !(now & Y2))
 			key_value = 6;
-		if (GPIO_ReadInputDataBit(YPORT, Y3))
+		if ((prev & Y3) && !(now & Y3))
 			key_value = 3;
 		break;
 	case 3:
-		if (GPIO_ReadInputDataBit(YPORT, Y0))
+		if ((prev & Y0) && !(now & Y0))
 			key_value = 13;
-		if (GPIO_ReadInputDataBit(YPORT, Y1))
+		if ((prev & Y1) && !(now & Y1))
 			key_value = 12;
-		if (GPIO_ReadInputDataBit(YPORT, Y2))
+		if ((prev & Y2) && !(now & Y2))
 			key_value = 11;
-		if (GPIO_ReadInputDataBit(YPORT, Y3))
+		if ((prev & Y3) && !(now & Y3))
 			key_value = 10;
 		break;
 	}
