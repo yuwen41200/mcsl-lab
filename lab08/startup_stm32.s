@@ -163,7 +163,7 @@ g_pfnVectors:
 	.word	0
 	.word	0
 	.word	0
-	.word	0
+	.word	EXTI15_10_IRQHandler
 	.word	0
 	.word	0
 	.word	0
