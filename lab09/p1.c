@@ -55,7 +55,6 @@ void SysTick_Handler() {
 	write_to_lcd(0x10, 1); // shift cursor
 	write_to_lcd(0x10, 1); // shift cursor
 	write_to_lcd(0x20, 0); // print ' '
-	write_to_lcd(0x20, 0); // print ' '
 	write_to_lcd(0x34, 0); // print '4'
 	write_to_lcd(0x35, 0); // print '5'
 }
