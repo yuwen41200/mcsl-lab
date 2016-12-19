@@ -1,27 +1,28 @@
 #ifndef LIBTMD_H
 #define LIBTMD_H
 
-extern void delay_ms(int);
+extern void delay_ms(unsigned);
+extern void fpu_enable();
 
 #include "stm32l476xx.h"
 
 #ifndef GPIO_PIN_0
-#define GPIO_PIN_0 ((uint16_t) 0x0001)
-#define GPIO_PIN_1 ((uint16_t) 0x0002)
-#define GPIO_PIN_2 ((uint16_t) 0x0004)
-#define GPIO_PIN_3 ((uint16_t) 0x0008)
-#define GPIO_PIN_4 ((uint16_t) 0x0010)
-#define GPIO_PIN_5 ((uint16_t) 0x0020)
-#define GPIO_PIN_6 ((uint16_t) 0x0040)
-#define GPIO_PIN_7 ((uint16_t) 0x0080)
-#define GPIO_PIN_8 ((uint16_t) 0x0100)
-#define GPIO_PIN_9 ((uint16_t) 0x0200)
-#define GPIO_PIN_10 ((uint16_t) 0x0400)
-#define GPIO_PIN_11 ((uint16_t) 0x0800)
-#define GPIO_PIN_12 ((uint16_t) 0x1000)
-#define GPIO_PIN_13 ((uint16_t) 0x2000)
-#define GPIO_PIN_14 ((uint16_t) 0x4000)
-#define GPIO_PIN_15 ((uint16_t) 0x8000)
+#define GPIO_PIN_0   ((uint16_t) 0x0001)
+#define GPIO_PIN_1   ((uint16_t) 0x0002)
+#define GPIO_PIN_2   ((uint16_t) 0x0004)
+#define GPIO_PIN_3   ((uint16_t) 0x0008)
+#define GPIO_PIN_4   ((uint16_t) 0x0010)
+#define GPIO_PIN_5   ((uint16_t) 0x0020)
+#define GPIO_PIN_6   ((uint16_t) 0x0040)
+#define GPIO_PIN_7   ((uint16_t) 0x0080)
+#define GPIO_PIN_8   ((uint16_t) 0x0100)
+#define GPIO_PIN_9   ((uint16_t) 0x0200)
+#define GPIO_PIN_10  ((uint16_t) 0x0400)
+#define GPIO_PIN_11  ((uint16_t) 0x0800)
+#define GPIO_PIN_12  ((uint16_t) 0x1000)
+#define GPIO_PIN_13  ((uint16_t) 0x2000)
+#define GPIO_PIN_14  ((uint16_t) 0x4000)
+#define GPIO_PIN_15  ((uint16_t) 0x8000)
 #define GPIO_PIN_ALL ((uint16_t) 0xFFFF)
 #endif
 
@@ -45,8 +46,12 @@ void TMD_GPIO_Init() {
 	GPIOB->OTYPER  &= 0b11111111111111111111111100000000;
 }
 
-#define TMD_GPIO_SetPinLow(GPIOX, GPIO_PIN_Y) ((GPIOX)->BRR = (GPIO_PIN_Y))
+void TMD_GPIO_SetPinLow(GPIO_TypeDef *GPIOX, uint16_t GPIO_PIN_Y) {
+	GPIOX->BRR = GPIO_PIN_Y;
+}
 
-#define TMD_GPIO_SetPinHigh(GPIOX, GPIO_PIN_Y) ((GPIOX)->BSRR = (GPIO_PIN_Y))
+void TMD_GPIO_SetPinHigh(GPIO_TypeDef *GPIOX, uint16_t GPIO_PIN_Y) {
+	GPIOX->BSRR = GPIO_PIN_Y;
+}
 
 #endif

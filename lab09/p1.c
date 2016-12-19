@@ -1,3 +1,4 @@
+#include "stm32l476xx.h"
 // I cannot use TM Libraries! TMD!
 #include "libtmd.h"
 
@@ -10,7 +11,7 @@ const GPIO_TypeDef *LCD_DATA_PORT[8] = {
 	GPIOB,
 	GPIOB,
 	GPIOB
-}
+};
 const GPIO_TypeDef *LCD_RS_PORT = GPIOA;
 const GPIO_TypeDef *LCD_RW_PORT = GPIOA;
 const GPIO_TypeDef *LCD_EN_PORT = GPIOA;
@@ -29,22 +30,23 @@ const uint16_t LCD_RS_PIN = GPIO_PIN_5;
 const uint16_t LCD_RW_PIN = GPIO_PIN_6;
 const uint16_t LCD_EN_PIN = GPIO_PIN_7;
 
-void SysTick_UserConfig(int);
+void SysTick_UserConfig(float);
 void SysTick_Handler();
 void init();
 void init_lcd();
 void write_to_lcd(int, int);
 
 int main() {
+	fpu_enable();
 	init();
 	SysTick_UserConfig(0.3);
 	while (1);
 	return 0;
 }
 
-void SysTick_UserConfig(int n) {
+void SysTick_UserConfig(float n) {
 	SysTick->CTRL |= 0x00000004;
-	SysTick->LOAD = n * 4000000;
+	SysTick->LOAD = (uint32_t) (n * 4000000.0);
 	SysTick->VAL = 0;
 	SysTick->CTRL |= 0x00000003;
 }
@@ -79,7 +81,7 @@ void write_to_lcd(int input, int is_cmd) {
 
 	TMD_GPIO_SetPinLow(LCD_RW_PORT, LCD_RW_PIN);
 
-	for (int i = 0 ; i < 8 ; i++) {
+	for (int i = 0; i < 8; ++i) {
 		if (input & (1 << i))
 			TMD_GPIO_SetPinHigh(LCD_DATA_PORT[i], LCD_DATA_PIN[i]);
 		else
