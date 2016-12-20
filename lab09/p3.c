@@ -129,8 +129,9 @@ void SysTick_Handler() {
 		}
 	}
 	else {
-		int16_t v = get_temperature();
-		write_int_to_lcd(v);
+		SysTick->CTRL &= 0xFFFFFFFE;
+		write_int_to_lcd(get_temperature());
+		SysTick->CTRL |= 0x00000001;
 	}
 }
 
@@ -189,9 +190,51 @@ void write_str_to_lcd(char *str) {
 	position++;
 }
 
-void write_int_to_lcd(int16_t i) {
-	while (i) {
-		write_to_lcd(0x30 + i % 10, 0);
-		i /= 10;
+void write_int_to_lcd(int16_t in) {
+	switch (resolution) {
+		case 12:
+			in &= 0xFFFF;
+			break;
+		case 11:
+			in &= 0xFFFE;
+			break;
+		case 10:
+			in &= 0xFFFC;
+			break;
+		case 9:
+			in &= 0xFFF8;
+			break;
+		default:
+			break;
 	}
+	int16_t in1 = in >> 4;
+	int16_t in2 = ((in & 0x0001) * 0.0625 + (in & 0x0002) * 0.125 + \
+	               (in & 0x0004) * 0.25 + (in & 0x0008) * 0.5) * 1000;
+	init();
+	write_to_lcd(0x30, 0);
+	write_to_lcd(0x30, 0);
+	write_to_lcd(0x2E, 0);
+	write_to_lcd(0x30, 0);
+	write_to_lcd(0x30, 0);
+	write_to_lcd(0x30, 0);
+	write_to_lcd(0x30, 0);
+	write_to_lcd(0x10, 1);
+	write_to_lcd(0x30 + in2 % 10, 0);
+	in2 /= 10;
+	write_to_lcd(0x10, 1);
+	write_to_lcd(0x30 + in2 % 10, 0);
+	in2 /= 10;
+	write_to_lcd(0x10, 1);
+	write_to_lcd(0x30 + in2 % 10, 0);
+	in2 /= 10;
+	write_to_lcd(0x10, 1);
+	write_to_lcd(0x30 + in2 % 10, 0);
+	in2 /= 10;
+	write_to_lcd(0x10, 1);
+	write_to_lcd(0x10, 1);
+	write_to_lcd(0x30 + in1 % 10, 0);
+	in1 /= 10;
+	write_to_lcd(0x10, 1);
+	write_to_lcd(0x30 + in1 % 10, 0);
+	in1 /= 10;
 }
