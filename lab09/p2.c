@@ -1,4 +1,3 @@
-#include "stm32l476xx.h"
 // I cannot use TM Libraries! TMD!
 #include "libtmd.h"
 
@@ -62,7 +61,7 @@ void write_to_lcd(int, int);
 void create_font(int, const int *);
 void write_str_to_lcd(char *);
 
-int mode = 0, position = 0;
+int counter = 0, mode = 0, position = 0;
 
 int main() {
 	int prev_btn = 1, curr_btn = 1;
@@ -90,11 +89,35 @@ void SysTick_UserConfig(float n) {
 
 void SysTick_Handler() {
 	if (mode == 0) {
+		counter = counter + 1;
+		if (counter == 18) {
+			write_to_lcd(0x80 + 0x0F, 1);
+			write_to_lcd(0x20, 0); // print ' '
+			write_to_lcd(0x20, 0); // print ' '
+			write_to_lcd(0x80 + 0x41, 1);
+		}
+		if (counter == 34) {
+			write_to_lcd(0x80 + 0x4F, 1);
+			write_to_lcd(0x20, 0); // print ' '
+			write_to_lcd(0x20, 0); // print ' '
+			write_to_lcd(0x80 + 0x1, 1);
+			counter = 2;
+		}
 		write_to_lcd(0x10, 1); // shift cursor
 		write_to_lcd(0x10, 1); // shift cursor
 		write_to_lcd(0x20, 0); // print ' '
 		write_to_lcd(0x00, 0); // print '4'
 		write_to_lcd(0x01, 0); // print '5'
+		if (counter == 17) {
+			write_to_lcd(0x80 + 0x40, 1);
+			write_to_lcd(0x01, 0); // print '5'
+			write_to_lcd(0x80 + 0x0F, 1);
+		}
+		if (counter == 33) {
+			write_to_lcd(0x80 + 0x0, 1);
+			write_to_lcd(0x01, 0); // print '5'
+			write_to_lcd(0x80 + 0x4F, 1);
+		}
 	}
 	else
 		write_str_to_lcd(test_string);
