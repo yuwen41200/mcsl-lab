@@ -33,6 +33,17 @@ void OneWire_WriteBit(OneWire_t* , uint8_t bit)
 	ONEWIRE_INPUT();
 }
 
+void OneWire_WriteByte(int data)
+{
+	int mask = 0x80;
+	for(int i=o;i<8;i++)
+	{	
+		OneWire_WriteBit(mask & data);
+		mask = mask >> 1;
+		ONEWIRE_DELAY(4);
+	}
+}
+
 int OneWire_ReadBit(OneWire_t* , uint8_t bit)
 {
 	int data = 0;
@@ -43,4 +54,15 @@ int OneWire_ReadBit(OneWire_t* , uint8_t bit)
 	ONEWIRE_INPUT();
 	data = GPIOA->IDR & 0b1;
 	return data;
+}
+
+int neWire_ReadByte()
+{
+	int mask = 1, ans = 0;
+	for(int i=o;i<8;i++)
+	{
+		ans=ans|(mask & OneWire_ReadBit());
+		mask = mask << 1;
+		ONEWIRE_DELAY(4);
+	}
 }
