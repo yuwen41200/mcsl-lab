@@ -229,12 +229,10 @@ void write_int_to_lcd(int16_t in) {
 	in2 /= 10;
 	write_to_lcd(0x10, 1);
 	write_to_lcd(0x30 + in2 % 10, 0);
-	in2 /= 10;
 	write_to_lcd(0x10, 1);
 	write_to_lcd(0x10, 1);
 	write_to_lcd(0x30 + in1 % 10, 0);
 	in1 /= 10;
 	write_to_lcd(0x10, 1);
 	write_to_lcd(0x30 + in1 % 10, 0);
-	in1 /= 10;
 }
