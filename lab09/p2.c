@@ -52,18 +52,32 @@ const int map_five[8] = {
 	0x00
 };
 
+const char *test_string = "Test: E = m * c ^ 2";
+
 void SysTick_UserConfig(float);
 void SysTick_Handler();
 void init();
 void init_lcd();
 void write_to_lcd(int, int);
 void create_font(int, const int *);
+void write_str_to_lcd(char *);
+
+int mode = 0, position = 0;
 
 int main() {
+	int prev_btn = 1, curr_btn = 1;
 	fpu_enable();
 	init();
 	SysTick_UserConfig(0.3);
-	while (1);
+	while (1) {
+		if (!prev_btn && curr_btn) {
+			mode ^= 1;
+			position = 0;
+			init();
+		}
+		prev_btn = curr_btn;
+		curr_btn = GPIOC->IDR & GPIO_PIN_13;
+	}
 	return 0;
 }
 
@@ -75,11 +89,15 @@ void SysTick_UserConfig(float n) {
 }
 
 void SysTick_Handler() {
-	write_to_lcd(0x10, 1); // shift cursor
-	write_to_lcd(0x10, 1); // shift cursor
-	write_to_lcd(0x20, 0); // print ' '
-	write_to_lcd(0x34, 0); // print '4'
-	write_to_lcd(0x35, 0); // print '5'
+	if (mode == 0) {
+		write_to_lcd(0x10, 1); // shift cursor
+		write_to_lcd(0x10, 1); // shift cursor
+		write_to_lcd(0x20, 0); // print ' '
+		write_to_lcd(0x00, 0); // print '4'
+		write_to_lcd(0x01, 0); // print '5'
+	}
+	else
+		write_str_to_lcd(test_string);
 }
 
 void init() {
@@ -123,4 +141,13 @@ void create_font(int location, const int *font_array) {
 	write_to_lcd(location & 0x3F | 0x40, 1);
 	for (int i = 0; i < 8; ++i)
 		write_to_lcd(font_array[i] & 0x1F, 0);
+}
+
+void write_str_to_lcd(char *str) {
+	if (str[position] == 0) {
+		position = 0;
+		init();
+	}
+	write_to_lcd(str[position], 0);
+	position++;
 }
