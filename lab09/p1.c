@@ -36,6 +36,8 @@ void init();
 void init_lcd();
 void write_to_lcd(int, int);
 
+int counter = 0;
+
 int main() {
 	fpu_enable();
 	init();
@@ -52,11 +54,40 @@ void SysTick_UserConfig(float n) {
 }
 
 void SysTick_Handler() {
+	counter = counter + 1;
+
+	if(counter == 18)
+	{
+			write_to_lcd(0x80+0x0F, 1);
+			write_to_lcd(0x20, 0); // print ' '
+			write_to_lcd(0x20, 0); // print ' '
+			write_to_lcd(0x80+0x41, 1);
+	}
+	if(counter == 34)
+	{
+			write_to_lcd(0x80+0x4F, 1);
+			write_to_lcd(0x20, 0); // print ' '
+			write_to_lcd(0x20, 0); // print ' '
+			write_to_lcd(0x80+0x1, 1);
+			counter = 2;
+	}
 	write_to_lcd(0x10, 1); // shift cursor
 	write_to_lcd(0x10, 1); // shift cursor
 	write_to_lcd(0x20, 0); // print ' '
 	write_to_lcd(0x34, 0); // print '4'
 	write_to_lcd(0x35, 0); // print '5'
+	if(counter == 17)
+	{
+		write_to_lcd(0x80+0x40, 1);
+		write_to_lcd(0x35, 0); // print '5'
+		write_to_lcd(0x80+0x0F, 1);
+	}
+	if(counter == 33)
+	{
+			write_to_lcd(0x80+0x0, 1);
+			write_to_lcd(0x35, 0); // print '5'
+			write_to_lcd(0x80+0x4F, 1);
+	}
 }
 
 void init() {
