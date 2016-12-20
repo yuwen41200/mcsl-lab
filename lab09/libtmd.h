@@ -58,7 +58,10 @@ void TMD_GPIO_SetPinHigh(GPIO_TypeDef *GPIOX, uint16_t GPIO_PIN_Y) {
 
 void usleep(unsigned delay) {
 	RCC->APB1ENR1 |= 0b1;
-	TIM2->ARR = (uint32_t) (delay * 1000 * (4000000 / 40000));
+	if ((uint32_t) (delay * 0.1) == 0)
+		TIM2->ARR = 1;
+	else
+		TIM2->ARR = (uint32_t) (delay * 0.1);
 	TIM2->PSC = (uint32_t) 39999;
 	TIM2->EGR = TIM_EGR_UG;
 	TIM2->CR1 |= TIM_CR1_CEN;

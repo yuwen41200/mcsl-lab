@@ -1,6 +1,6 @@
 #include "libtmd.h"
 
-uint8_t OneWire_Reset()
+void OneWire_Reset()
 {
 	ONEWIRE_INPUT();
 	GPIOA->BRR = GPIO_PIN_8; // high -> low
