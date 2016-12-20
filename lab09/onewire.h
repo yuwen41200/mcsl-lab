@@ -1,6 +1,6 @@
 uint8_t OneWire_Reset()
 {
-	ONEWIRE_INPUT(); 
+	ONEWIRE_INPUT();
 	GPIOA -> BRR = GPIO_PIN_8;  //high->low
 	ONEWIRE_OUTPUT();
 	ONEWIRE_DELAY(480);
@@ -11,7 +11,7 @@ uint8_t OneWire_Reset()
 	ONEWIRE_DELAY(410);
 }
 
-void OneWire_WriteBit(OneWire_t* , uint8_t bit)
+void OneWire_WriteBit(uint8_t bit)
 {
 	ONEWIRE_INPUT();
 	if (bit) //1
@@ -44,9 +44,9 @@ void OneWire_WriteByte(int data)
 	}
 }
 
-int OneWire_ReadBit(OneWire_t* , uint8_t bit)
+uint8_t OneWire_ReadBit()
 {
-	int data = 0;
+	uint8_t data = 0;
 	ONEWIRE_INPUT(); 
 	GPIOA -> BRR = GPIO_PIN_8;  //high->low
 	ONEWIRE_OUTPUT();
@@ -56,7 +56,7 @@ int OneWire_ReadBit(OneWire_t* , uint8_t bit)
 	return data;
 }
 
-int neWire_ReadByte()
+int OneWire_ReadByte()
 {
 	int mask = 1, ans = 0;
 	for(int i=o;i<8;i++)
@@ -65,4 +65,14 @@ int neWire_ReadByte()
 		mask = mask << 1;
 		ONEWIRE_DELAY(4);
 	}
+}
+
+void ONEWIRE_INPUT()
+{
+	GPIOA->MODER &= 0b11111111111111001111111111111111;
+}
+void ONEWIRE_OUTPUT()
+{
+	GPIOA->MODER &= 0b11111111111111001111111111111111;
+	GPIOA->MODER |= 0b00000000000000010000000000000000;
 }
