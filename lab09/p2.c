@@ -51,7 +51,7 @@ const int map_five[8] = {
 	0x00
 };
 
-const char *test_string = "Test: E = m * c ^ 2";
+const char *test_string = "Test: E=m*c^2";
 
 void SysTick_UserConfig(float);
 void SysTick_Handler();
@@ -72,7 +72,10 @@ int main() {
 		if (!prev_btn && curr_btn) {
 			mode ^= 1;
 			position = 0;
+			counter = 0;
+			SysTick->CTRL &= 0xFFFFFFFE;
 			init();
+			SysTick->CTRL |= 0x00000001;
 		}
 		prev_btn = curr_btn;
 		curr_btn = GPIOC->IDR & GPIO_PIN_13;
@@ -169,7 +172,10 @@ void create_font(int location, const int *font_array) {
 void write_str_to_lcd(char *str) {
 	if (str[position] == 0) {
 		position = 0;
+		counter = 0;
+		SysTick->CTRL &= 0xFFFFFFFE;
 		init();
+		SysTick->CTRL |= 0x00000001;
 	}
 	write_to_lcd(str[position], 0);
 	position++;
