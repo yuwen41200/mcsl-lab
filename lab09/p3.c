@@ -1,5 +1,5 @@
-// I cannot use TM Libraries! TMD!
 #include "libtmd.h"
+#include "ds18b20.h"
 
 const GPIO_TypeDef *LCD_DATA_PORT[8] = {
 	GPIOB,
@@ -52,6 +52,7 @@ const int map_five[8] = {
 };
 
 const char *test_string = "Test: E=m*c^2";
+const unsigned resolution = 11;
 
 void SysTick_UserConfig(float);
 void SysTick_Handler();
@@ -60,6 +61,7 @@ void init_lcd();
 void write_to_lcd(int, int);
 void create_font(int, const int *);
 void write_str_to_lcd(char *);
+void write_int_to_lcd(int16_t);
 
 int counter = 0, mode = 0, position = 0;
 
@@ -67,15 +69,19 @@ int main() {
 	int prev_btn = 1, curr_btn = 1;
 	fpu_enable();
 	init();
+	set_resolution(resolution);
 	SysTick_UserConfig(0.3);
 	while (1) {
 		if (!prev_btn && curr_btn) {
 			mode ^= 1;
 			position = 0;
 			counter = 0;
-			SysTick->CTRL &= 0xFFFFFFFE;
+			SysTick->CTRL &= 0xFFFFFFF8;
 			init();
-			SysTick->CTRL |= 0x00000001;
+			if (mode == 0)
+				SysTick_UserConfig(0.3);
+			else
+				SysTick_UserConfig(1);
 		}
 		prev_btn = curr_btn;
 		curr_btn = GPIOC->IDR & GPIO_PIN_13;
@@ -122,8 +128,10 @@ void SysTick_Handler() {
 			write_to_lcd(0x80 + 0x4F, 1);
 		}
 	}
-	else
-		write_str_to_lcd(test_string);
+	else {
+		int16_t v = get_temperature();
+		write_int_to_lcd(v);
+	}
 }
 
 void init() {
@@ -179,4 +187,11 @@ void write_str_to_lcd(char *str) {
 	}
 	write_to_lcd(str[position], 0);
 	position++;
+}
+
+void write_int_to_lcd(int16_t i) {
+	while (i) {
+		write_to_lcd(0x30 + i % 10, 0);
+		i /= 10;
+	}
 }
