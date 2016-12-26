@@ -44,4 +44,8 @@ void GPIO_SetPinHigh(GPIO_TypeDef *GPIOX, uint16_t GPIO_PIN_Y) {
 	GPIOX->BSRR = GPIO_PIN_Y;
 }
 
+int GPIO_ReadInputDataBit(GPIO_TypeDef *GPIOX, uint16_t GPIO_PIN_Y) {
+	return GPIOX->IDR & GPIO_PIN_Y;
+}
+
 #endif

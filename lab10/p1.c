@@ -1,3 +1,5 @@
+#include "libtmd.h"
+
 void GPIO_Init(void) {
 	// AHB2
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN | RCC_AHB2ENR_GPIOBEN | RCC_AHB2ENR_GPIOCEN;
@@ -36,4 +38,17 @@ int UART_Transmit(uint8_t *arr, uint32_t size) {
 	}
 	while (!READ_BIT(USART1->ISR, USART_ISR_TC));
 	return sent;
+}
+
+int main(void) {
+	int prev_btn = 1, curr_btn = 1;
+	GPIO_Init();
+	USART1_Init();
+	while (1) {
+		if (!prev_btn && curr_btn)
+			UART_Transmit((uint8_t *) "Hello World!", 12);
+		prev_btn = curr_btn;
+		curr_btn = GPIO_ReadInputDataBit(GPIOC, GPIO_PIN_13);
+	}
+	return 0;
 }
