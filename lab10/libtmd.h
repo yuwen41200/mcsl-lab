@@ -1,5 +1,5 @@
-#ifndef LIBTMD_H
-#define LIBTMD_H
+#ifndef LIBTMD_H_
+#define LIBTMD_H_
 
 extern void delay_ms(unsigned);
 extern void fpu_enable();
