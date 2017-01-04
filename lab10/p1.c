@@ -55,7 +55,7 @@ int main(void) {
 	GPIO_Init();
 	USART1_Init();
 	while (1) {
-		//if (!prev_btn && curr_btn)
+		if (!prev_btn && curr_btn)
 			UART_Transmit((uint8_t *) "Hello World!", 12);
 		prev_btn = curr_btn;
 		curr_btn = GPIO_ReadInputDataBit(GPIOC, GPIO_PIN_13);
