@@ -26,7 +26,7 @@ extern void fpu_enable();
 #define GPIO_PIN_ALL ((uint16_t) 0xFFFF)
 #endif
 
-#ifndef SET_BIT(REG, BIT)
+#ifndef SET_BIT
 #define SET_BIT(REG, BIT) ((REG) |= (BIT))
 #define CLEAR_BIT(REG, BIT) ((REG) &= ~(BIT))
 #define READ_BIT(REG, BIT) ((REG) & (BIT))
